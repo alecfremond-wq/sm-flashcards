@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strategic Management — Study App</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --indigo:#4f46e5;--indigo-lt:#eef2ff;--indigo-dk:#3730a3;
+  --green:#16a34a;--green-lt:#f0fdf4;
+  --red:#dc2626;--red-lt:#fef2f2;
+  --amber:#d97706;--amber-lt:#fffbeb;
+  --bg:#f1f5f9;--surface:#fff;--border:#e2e8f0;
+  --text:#0f172a;--sub:#475569;--muted:#94a3b8;
+  --radius:14px;--card-h:340px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06);
+}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+
+/* HEADER */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:200}
+.logo{font-size:.95rem;font-weight:700;color:var(--indigo);letter-spacing:-.02em}
+.logo span{color:var(--sub);font-weight:400}
+.hdr-stats{display:flex;gap:18px}
+.hst{text-align:center}
+.hst-n{font-size:1rem;font-weight:700}
+.hst-l{font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.hst.k .hst-n{color:var(--green)}
+.hst.r .hst-n{color:var(--red)}
+.hst.m .hst-n{color:var(--indigo)}
+
+/* MODE SWITCHER */
+.mode-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 24px;display:flex;gap:6px;justify-content:center}
+.mode-btn{padding:8px 18px;font-size:.82rem;font-weight:600;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--sub);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+.mode-btn:hover{border-color:var(--indigo);color:var(--indigo)}
+.mode-btn.active{border-color:var(--indigo);background:var(--indigo);color:#fff}
+
+/* MODULE TABS */
+.mod-nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.mod-nav::-webkit-scrollbar{display:none}
+.mod-tab{padding:11px 14px;font-size:.78rem;font-weight:600;color:var(--sub);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s}
+.mod-tab:hover{color:var(--indigo)}
+.mod-tab.active{color:var(--indigo);border-bottom-color:var(--indigo)}
+
+/* PROGRESS */
+.prog-wrap{padding:12px 24px 0;max-width:840px;width:100%;margin:0 auto}
+.prog-meta{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:6px}
+.prog-track{height:4px;background:var(--border);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:var(--indigo);border-radius:99px;transition:width .35s ease}
+
+/* MAIN */
+main{flex:1;display:flex;flex-direction:column;align-items:center;padding:18px 18px 40px;max-width:840px;width:100%;margin:0 auto}
+
+/* BADGES */
+.cat-row{display:flex;gap:6px;align-items:center;align-self:flex-start;margin-bottom:12px;flex-wrap:wrap}
+.cat-badge,.src-badge{display:inline-flex;align-items:center;gap:5px;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:4px 10px;border-radius:99px}
+.cat-badge{background:var(--indigo-lt);color:var(--indigo)}
+.src-badge{background:var(--amber-lt);color:var(--amber)}
+
+/* CARD */
+.scene{width:100%;height:var(--card-h);perspective:1200px;cursor:pointer;margin-bottom:16px}
+.card-3d{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .42s cubic-bezier(.4,0,.2,1)}
+.card-3d.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px 44px;text-align:center;box-shadow:var(--shadow)}
+.face.front{background:var(--surface);border:1.5px solid var(--border)}
+.face.back{background:var(--indigo);transform:rotateY(180deg);color:#fff}
+.face-tag{position:absolute;top:14px;left:18px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;opacity:.4}
+.face-tip{position:absolute;bottom:12px;font-size:.66rem;opacity:.35;display:flex;align-items:center;gap:4px}
+.face-tip kbd{background:rgba(0,0,0,.07);border:1px solid rgba(0,0,0,.12);border-radius:4px;padding:1px 5px;font-size:.62rem;font-family:inherit}
+.face.back .face-tip kbd{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.25)}
+.card-actions{position:absolute;top:10px;right:12px;display:flex;gap:5px;opacity:0;transition:opacity .2s}
+.scene:hover .card-actions{opacity:1}
+.card-btn{width:26px;height:26px;border-radius:6px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:filter .15s}
+.card-btn.edit-btn{background:var(--indigo-lt);color:var(--indigo)}
+.card-btn.del-btn{background:var(--red-lt);color:var(--red)}
+.card-btn:hover{filter:brightness(.93)}
+.term{font-size:1.45rem;font-weight:700;color:var(--text);line-height:1.25}
+.def{font-size:.98rem;line-height:1.65;color:#fff;font-weight:400}
+
+/* FLASHCARD ACTIONS */
+.action-row{display:flex;gap:10px;width:100%;margin-bottom:14px;opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .22s,transform .22s}
+.action-row.show{opacity:1;pointer-events:all;transform:none}
+.act-btn{flex:1;padding:12px;border-radius:10px;font-size:.88rem;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:filter .12s,transform .1s}
+.act-btn:active{transform:scale(.97)}
+.act-btn .kb{font-size:.66rem;font-weight:400;opacity:.5}
+.btn-still{background:var(--red-lt);color:var(--red)}
+.btn-know{background:var(--green-lt);color:var(--green)}
+.act-btn:hover{filter:brightness(.94)}
+
+/* NAV */
+.nav-row{display:flex;align-items:center;gap:12px;margin-bottom:18px;justify-content:center;width:100%}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);transition:border-color .15s,color .15s}
+.nav-btn:hover:not(:disabled){border-color:var(--indigo);color:var(--indigo)}
+.nav-btn:disabled{opacity:.3;cursor:default}
+.nav-count{font-size:.82rem;color:var(--sub);min-width:60px;text-align:center}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:100%}
+.tb-btn{padding:7px 13px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:.76rem;font-weight:600;cursor:pointer;color:var(--sub);display:flex;align-items:center;gap:5px;transition:all .15s;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.tb-btn:hover{border-color:var(--indigo);color:var(--indigo)}
+.tb-btn.on{border-color:var(--indigo);background:var(--indigo-lt);color:var(--indigo)}
+.tb-btn.add{border-color:var(--indigo);color:var(--indigo)}
+.tb-btn.add:hover{background:var(--indigo);color:#fff}
+
+/* SEARCH BAR */
+.search-bar{width:100%;margin-bottom:12px;display:none}
+.search-bar.show{display:block}
+.search-bar input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.9rem;outline:none;font-family:inherit;transition:border-color .15s}
+.search-bar input:focus{border-color:var(--indigo)}
+
+/* COMPLETE SCREEN */
+.complete{display:none;flex-direction:column;align-items:center;text-align:center;padding:44px 28px;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);width:100%;border:1.5px solid var(--border)}
+.complete.show{display:flex}
+.complete-icon{font-size:2.6rem;margin-bottom:14px}
+.complete h2{font-size:1.35rem;margin-bottom:6px}
+.complete p{color:var(--sub);margin-bottom:24px;font-size:.88rem;max-width:480px}
+.c-grid{display:flex;gap:14px;margin-bottom:24px;flex-wrap:wrap;justify-content:center}
+.c-box{background:var(--bg);border-radius:10px;padding:14px 22px;min-width:110px}
+.c-n{font-size:1.75rem;font-weight:800}
+.c-l{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.c-box.g .c-n{color:var(--green)}
+.c-box.r .c-n{color:var(--red)}
+.c-box.b .c-n{color:var(--indigo)}
+.btn-primary{padding:11px 28px;border-radius:9px;background:var(--indigo);color:#fff;font-size:.88rem;font-weight:700;border:none;cursor:pointer;transition:filter .15s}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-ghost{padding:11px 28px;border-radius:9px;background:none;color:var(--sub);font-size:.88rem;font-weight:600;border:1.5px solid var(--border);cursor:pointer;margin-top:6px}
+.btn-ghost:hover{border-color:var(--sub)}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:300;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.overlay.show{display:flex}
+.modal{background:var(--surface);border-radius:14px;width:100%;max-width:500px;padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.modal h3{font-size:1.05rem;font-weight:700;margin-bottom:18px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.72rem;font-weight:600;color:var(--sub);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.field input,.field textarea,.field select{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:.88rem;font-family:inherit;color:var(--text);background:var(--surface);transition:border-color .15s;outline:none}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--indigo)}
+.field textarea{resize:vertical;min-height:80px}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.options-list{display:flex;flex-direction:column;gap:6px}
+.opt-row{display:flex;gap:8px;align-items:center}
+.opt-row input[type=radio]{width:auto}
+.opt-row input[type=text]{flex:1}
+.modal-btns{display:flex;gap:8px;margin-top:18px}
+.modal-btns .btn-primary,.modal-btns .btn-ghost{flex:1;margin-top:0}
+
+/* ─── QUIZ MODE ─── */
+.quiz-card{background:var(--surface);border-radius:var(--radius);border:1.5px solid var(--border);padding:28px 32px;width:100%;margin-bottom:16px;box-shadow:var(--shadow)}
+.quiz-q{font-size:1.05rem;font-weight:600;line-height:1.5;margin-bottom:18px;color:var(--text)}
+.quiz-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+.quiz-opt{padding:13px 16px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);text-align:left;font-size:.92rem;cursor:pointer;color:var(--text);transition:all .15s;display:flex;align-items:center;gap:10px;font-family:inherit;line-height:1.45}
+.quiz-opt:hover:not(:disabled){border-color:var(--indigo);background:var(--indigo-lt)}
+.quiz-opt:disabled{cursor:default}
+.quiz-opt .opt-letter{width:22px;height:22px;border-radius:50%;background:var(--bg);font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--sub)}
+.quiz-opt.correct{border-color:var(--green);background:var(--green-lt);color:var(--green)}
+.quiz-opt.correct .opt-letter{background:var(--green);color:#fff}
+.quiz-opt.wrong{border-color:var(--red);background:var(--red-lt);color:var(--red)}
+.quiz-opt.wrong .opt-letter{background:var(--red);color:#fff}
+.quiz-explain{padding:14px 16px;background:var(--indigo-lt);border-left:3px solid var(--indigo);border-radius:6px;font-size:.85rem;line-height:1.55;color:var(--indigo-dk);margin-bottom:16px;display:none}
+.quiz-explain.show{display:block}
+.quiz-explain strong{display:block;margin-bottom:4px;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em}
+
+.quiz-stats{display:flex;gap:14px;justify-content:center;margin-bottom:16px}
+.qs{text-align:center}
+.qs-n{font-size:1.05rem;font-weight:700}
+.qs-l{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.qs.g .qs-n{color:var(--green)}
+.qs.r .qs-n{color:var(--red)}
+
+/* ─── MOCK EXAM ─── */
+.exam-header{background:var(--indigo);color:#fff;padding:16px 22px;border-radius:var(--radius);margin-bottom:16px;width:100%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.exam-header h2{font-size:1.05rem;font-weight:700}
+.timer{font-size:1.1rem;font-weight:700;font-variant-numeric:tabular-nums;background:rgba(255,255,255,.2);padding:6px 14px;border-radius:8px}
+.timer.warn{background:#dc2626}
+
+.start-card{background:var(--surface);border-radius:var(--radius);padding:36px 32px;text-align:center;border:1.5px solid var(--border);box-shadow:var(--shadow);width:100%}
+.start-card h2{font-size:1.3rem;margin-bottom:8px}
+.start-card p{color:var(--sub);font-size:.9rem;line-height:1.6;margin-bottom:20px}
+.start-stats{display:flex;justify-content:center;gap:24px;margin-bottom:24px}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:60px 20px;color:var(--sub);width:100%}
+.empty-icon{font-size:2.5rem;margin-bottom:10px;opacity:.4}
+.empty h3{font-size:1rem;font-weight:600;margin-bottom:6px;color:var(--text)}
+.empty p{font-size:.85rem}
+
+/* FOOTER */
+footer{text-align:center;font-size:.68rem;color:var(--muted);padding:10px 0 18px}
+footer kbd{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-family:inherit;font-size:.66rem}
+
+/* ─── TEST MODE ─── */
+.test-setup{background:var(--surface);border-radius:var(--radius);padding:32px;width:100%;border:1.5px solid var(--border);box-shadow:var(--shadow)}
+.test-setup h2{font-size:1.25rem;margin-bottom:6px}
+.test-setup p{color:var(--sub);font-size:.88rem;margin-bottom:20px;line-height:1.55}
+.mod-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.mod-pill{padding:10px 16px;border:1.5px solid var(--border);border-radius:99px;background:var(--surface);font-size:.82rem;font-weight:600;color:var(--sub);cursor:pointer;display:flex;align-items:center;gap:8px;font-family:inherit;transition:all .15s}
+.mod-pill:hover{border-color:var(--indigo);color:var(--indigo)}
+.mod-pill.on{border-color:var(--indigo);color:var(--indigo);background:var(--surface);box-shadow:inset 0 0 0 1px var(--indigo)}
+.mod-pill .pill-count{font-size:.7rem;background:var(--indigo-lt);color:var(--indigo);padding:2px 7px;border-radius:99px;font-weight:700}
+.mod-pill:not(.on) .pill-count{background:var(--bg);color:var(--muted)}
+.setup-opts{display:flex;gap:14px;align-items:center;margin-bottom:24px;flex-wrap:wrap}
+.setup-opts label{font-size:.85rem;color:var(--sub);display:flex;align-items:center;gap:6px;cursor:pointer}
+.setup-opts input[type=checkbox]{accent-color:var(--indigo)}
+
+.test-prompt{background:var(--surface);border-radius:var(--radius);border:1.5px solid var(--border);padding:28px;width:100%;margin-bottom:14px;box-shadow:var(--shadow)}
+.test-term{font-size:1.5rem;font-weight:700;line-height:1.3;text-align:center;padding:24px 12px;background:var(--bg);border-radius:10px;margin-bottom:18px}
+.test-input{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:14px;font-size:.95rem;font-family:inherit;color:var(--text);background:var(--surface);outline:none;resize:vertical;min-height:120px;line-height:1.55;transition:border-color .15s}
+.test-input:focus{border-color:var(--indigo)}
+.test-input:disabled{background:var(--bg);color:var(--sub)}
+.test-submit-row{display:flex;gap:8px;margin-top:12px;justify-content:flex-end}
+.test-submit-row button{padding:10px 22px;border-radius:8px;font-size:.85rem;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:filter .15s}
+.btn-submit{background:var(--indigo);color:#fff}
+.btn-submit:hover{filter:brightness(1.08)}
+.btn-skip{background:var(--bg);color:var(--sub);border:1.5px solid var(--border)!important}
+.btn-skip:hover{border-color:var(--sub)}
+
+.test-result{display:none;margin-top:16px;padding-top:18px;border-top:1.5px solid var(--border)}
+.test-result.show{display:block}
+.test-verdict{padding:14px 16px;border-radius:10px;display:flex;align-items:center;gap:12px;margin-bottom:14px;font-size:.88rem;font-weight:600}
+.test-verdict.good{background:var(--green-lt);color:var(--green)}
+.test-verdict.partial{background:var(--amber-lt);color:var(--amber)}
+.test-verdict.bad{background:var(--red-lt);color:var(--red)}
+.verdict-icon{font-size:1.4rem;flex-shrink:0}
+.verdict-bar{flex:1;height:6px;background:rgba(0,0,0,.06);border-radius:99px;overflow:hidden;margin-top:4px}
+.verdict-bar-fill{height:100%;border-radius:99px;transition:width .4s ease}
+.test-verdict.good .verdict-bar-fill{background:var(--green)}
+.test-verdict.partial .verdict-bar-fill{background:var(--amber)}
+.test-verdict.bad .verdict-bar-fill{background:var(--red)}
+
+.test-answer-block{padding:16px;background:var(--indigo-lt);border-left:3px solid var(--indigo);border-radius:6px;margin-bottom:14px}
+.test-answer-block .tab-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--indigo);margin-bottom:6px}
+.test-answer-block .tab-text{font-size:.92rem;line-height:1.6;color:var(--text)}
+
+.test-judge-row{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
+.test-judge-row .hint{flex:1 0 100%;font-size:.78rem;color:var(--muted);text-align:center;margin-bottom:4px}
+.btn-judge{flex:1;min-width:110px;padding:13px 8px;border-radius:10px;font-size:.88rem;font-weight:700;border:1.5px solid;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;transition:all .15s;position:relative}
+.btn-mark-wrong{background:var(--red-lt);color:var(--red);border-color:var(--red-lt)}
+.btn-mark-partial{background:var(--amber-lt);color:var(--amber);border-color:var(--amber-lt)}
+.btn-mark-right{background:var(--green-lt);color:var(--green);border-color:var(--green-lt)}
+.btn-mark-wrong:hover{border-color:var(--red)}
+.btn-mark-partial:hover{border-color:var(--amber)}
+.btn-mark-right:hover{border-color:var(--green)}
+.btn-judge.suggested{border-color:currentColor;box-shadow:0 0 0 3px rgba(79,70,229,.08)}
+.btn-judge.suggested::after{content:"suggested";position:absolute;top:-9px;right:8px;font-size:.58rem;background:var(--indigo);color:#fff;padding:2px 6px;border-radius:99px;font-weight:700;letter-spacing:.04em}
+.btn-judge.active-pick{filter:saturate(1.3);box-shadow:0 0 0 2px currentColor inset}
+
+/* Smart mode badge */
+.smart-banner{background:linear-gradient(135deg,var(--indigo-lt),#fef3c7);border:1.5px dashed var(--indigo);border-radius:10px;padding:10px 14px;font-size:.82rem;color:var(--indigo-dk);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.smart-banner strong{font-weight:700}
+
+.test-next-row{display:flex;justify-content:center;margin-top:14px}
+.btn-test-next{padding:12px 36px;border-radius:9px;background:var(--indigo);color:#fff;font-size:.9rem;font-weight:700;border:none;cursor:pointer;display:none}
+.btn-test-next.show{display:block}
+.btn-test-next:hover{filter:brightness(1.08)}
+
+/* ─── PRACTICE AREA (flashcard mode) ─── */
+.practice-row{width:100%;margin-bottom:14px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}
+.practice-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.practice-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sub)}
+.practice-toggle{font-size:.72rem;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:5px;transition:color .15s}
+.practice-toggle:hover{color:var(--indigo)}
+.practice-input{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:.9rem;font-family:inherit;color:var(--text);background:var(--bg);outline:none;resize:vertical;min-height:90px;line-height:1.6;transition:border-color .15s}
+.practice-input:focus{border-color:var(--indigo);background:var(--surface)}
+.practice-input:disabled{opacity:.55;cursor:default}
+.practice-btn-row{display:flex;justify-content:flex-end;margin-top:9px}
+.btn-check{padding:9px 22px;border-radius:8px;background:var(--indigo);color:#fff;font-size:.85rem;font-weight:700;border:none;cursor:pointer;transition:filter .15s}
+.btn-check:hover{filter:brightness(1.1)}
+.btn-check:disabled{opacity:.4;cursor:default}
+.practice-reveal{margin-top:14px;padding-top:14px;border-top:1.5px solid var(--border);display:none}
+.practice-reveal.show{display:block}
+.practice-answer-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--indigo);margin-bottom:6px}
+.practice-answer-text{font-size:.92rem;line-height:1.65;color:var(--text);background:var(--indigo-lt);border-left:3px solid var(--indigo);border-radius:6px;padding:12px 14px}
+
+/* HIDDEN UTILITY */
+.hide{display:none!important}
+
+/* RESPONSIVE */
+@media (max-width:600px){
+  header{padding:0 16px}
+  .hdr-stats{gap:12px}
+  .hst-n{font-size:.92rem}
+  .face{padding:28px 24px}
+  .term{font-size:1.2rem}
+  .def{font-size:.92rem}
+  .quiz-card{padding:22px 18px}
+  .quiz-q{font-size:.96rem}
+  .quiz-opt{font-size:.86rem;padding:11px 12px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SM <span>Study App</span></div>
+  <div class="hdr-stats">
+    <div class="hst k"><div class="hst-n" id="s-know">0</div><div class="hst-l">Know</div></div>
+    <div class="hst r"><div class="hst-n" id="s-learn">0</div><div class="hst-l">Learning</div></div>
+    <div class="hst m"><div class="hst-n" id="s-left">—</div><div class="hst-l">Left</div></div>
+  </div>
+</header>
+
+<div class="mode-bar">
+  <button class="mode-btn active" data-mode="flash">📇 Flashcards</button>
+  <button class="mode-btn" data-mode="quiz">❓ Quiz</button>
+  <button class="mode-btn" data-mode="test">✍️ Test</button>
+  <button class="mode-btn" data-mode="exam">📝 Mock Exam</button>
+</div>
+
+<nav class="mod-nav" id="mod-nav">
+  <button class="mod-tab active" data-mod="all">All Modules</button>
+  <button class="mod-tab" data-mod="1">M1 · Fundamentals</button>
+  <button class="mod-tab" data-mod="2">M2 · Outside-in / Inside-out</button>
+  <button class="mod-tab" data-mod="3">M3 · Business & Corporate</button>
+  <button class="mod-tab" data-mod="4">M4 · Innovation & BM</button>
+  <button class="mod-tab" data-mod="5">M5 · Organizing & Change</button>
+</nav>
+
+<div class="prog-wrap" id="prog-wrap">
+  <div class="prog-meta"><span id="prog-txt">Card 1</span><span id="prog-pct">0%</span></div>
+  <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<main>
+
+<!-- ─── FLASHCARDS MODE ─── -->
+<div id="view-flash" style="width:100%">
+  <div id="flash-mod-banner" style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;box-shadow:var(--shadow)">
+    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);margin-bottom:10px">📚 Choose Module</div>
+    <div class="mod-pills" id="flash-mod-pills"></div>
+  </div>
+  <div id="study-area" style="width:100%;display:flex;flex-direction:column;align-items:flex-start">
+    <div class="cat-row">
+      <span class="cat-badge" id="cat-badge">—</span>
+      <span class="src-badge" id="src-badge" style="display:none">—</span>
+    </div>
+
+    <div class="search-bar" id="search-bar"><input id="search-inp" type="text" placeholder="Search terms or definitions…"></div>
+
+    <div class="scene" id="scene">
+      <div class="card-3d" id="card3d">
+        <div class="face front" onclick="flipCard()">
+          <span class="face-tag">Term</span>
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <button class="card-btn edit-btn" title="Edit" onclick="openEdit()">✎</button>
+            <button class="card-btn del-btn" title="Delete" onclick="deleteCard()">✕</button>
+          </div>
+          <div class="term" id="term-txt">—</div>
+          <div class="face-tip">Click or <kbd>Space</kbd> to reveal</div>
+        </div>
+        <div class="face back" onclick="flipCard()">
+          <span class="face-tag" style="opacity:.3">Definition</span>
+          <div class="def" id="def-txt"></div>
+          <div class="face-tip"><kbd>1</kbd> Still learning · <kbd>2</kbd> Know it</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-row" id="action-row">
+      <button class="act-btn btn-still" onclick="mark(false)">✗ Still Learning <span class="kb">[1]</span></button>
+      <button class="act-btn btn-know"  onclick="mark(true)">✓ Know It <span class="kb">[2]</span></button>
+    </div>
+
+    <!-- ─── PRACTICE INPUT ─── -->
+    <div class="practice-row" id="practice-row">
+      <div class="practice-header">
+        <span class="practice-title">✍️ Practice — write your answer</span>
+        <button class="practice-toggle" id="practice-toggle" onclick="togglePractice()">hide</button>
+      </div>
+      <div id="practice-body">
+        <textarea class="practice-input" id="practice-input" placeholder="Type your answer before flipping the card…"></textarea>
+        <div class="practice-btn-row">
+          <button class="btn-check" id="btn-check" onclick="checkPractice()">Check Answer →</button>
+        </div>
+        <div class="practice-reveal" id="practice-reveal">
+          <div class="practice-answer-label">Model Answer</div>
+          <div class="practice-answer-text" id="practice-answer-text"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" id="btn-prev" onclick="prev()">←</button>
+      <span class="nav-count" id="nav-count">1 / —</span>
+      <button class="nav-btn" id="btn-next" onclick="next()">→</button>
+    </div>
+
+    <div class="toolbar">
+      <button class="tb-btn" id="btn-shuf" onclick="toggleShuffle()">⇄ Shuffle</button>
+      <button class="tb-btn" id="btn-filt" onclick="toggleFilter()">📚 Learning only</button>
+      <button class="tb-btn" id="btn-search" onclick="toggleSearch()">🔍 Search</button>
+      <button class="tb-btn" onclick="resetAll()">↺ Restart</button>
+      <button class="tb-btn add" onclick="openAdd()">＋ Add card</button>
+    </div>
+  </div>
+
+  <div class="complete" id="complete">
+    <div class="complete-icon">🎉</div>
+    <h2>Round complete!</h2>
+    <p>You've gone through every card in this set.</p>
+    <div class="c-grid">
+      <div class="c-box g"><div class="c-n" id="c-know">0</div><div class="c-l">Know it</div></div>
+      <div class="c-box r"><div class="c-n" id="c-learn">0</div><div class="c-l">Still learning</div></div>
+    </div>
+    <button class="btn-primary" onclick="practiceWeak()">Practice Still Learning</button>
+    <button class="btn-ghost" onclick="resetAll()">Start over</button>
+  </div>
+</div>
+
+<!-- ─── QUIZ MODE ─── -->
+<div id="view-quiz" class="hide" style="width:100%">
+  <div class="quiz-stats">
+    <div class="qs g"><div class="qs-n" id="q-correct">0</div><div class="qs-l">Correct</div></div>
+    <div class="qs r"><div class="qs-n" id="q-wrong">0</div><div class="qs-l">Wrong</div></div>
+    <div class="qs"><div class="qs-n" id="q-pct">—</div><div class="qs-l">Score</div></div>
+  </div>
+
+  <div class="cat-row">
+    <span class="cat-badge" id="q-cat">—</span>
+    <span class="src-badge" id="q-src" style="display:none">—</span>
+  </div>
+
+  <div class="quiz-card" id="quiz-card">
+    <div class="quiz-q" id="quiz-q">Loading…</div>
+    <div class="quiz-opts" id="quiz-opts"></div>
+    <div class="quiz-explain" id="quiz-explain"><strong>Why?</strong><span id="quiz-explain-txt"></span></div>
+  </div>
+
+  <div class="nav-row">
+    <button class="nav-btn" id="qbtn-prev" onclick="quizPrev()">←</button>
+    <span class="nav-count" id="qnav-count">1 / —</span>
+    <button class="nav-btn" id="qbtn-next" onclick="quizNext()">→</button>
+  </div>
+
+  <div class="toolbar">
+    <button class="tb-btn" id="qbtn-shuf" onclick="toggleQuizShuffle()">⇄ Shuffle</button>
+    <button class="tb-btn" onclick="quizReset()">↺ Restart</button>
+  </div>
+</div>
+
+<!-- ─── TEST MODE (typed answer) ─── -->
+<div id="view-test" class="hide" style="width:100%">
+
+  <!-- SETUP SCREEN -->
+  <div id="test-setup" class="test-setup">
+    <h2>✍️ Test Yourself</h2>
+    <p>You'll see the front of a card and type the answer. The app checks for fundamental correctness — if it's close but not exact, you decide. Pick which modules to draw from.</p>
+
+    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--sub);margin-bottom:8px">Modules</div>
+    <div class="mod-pills" id="test-mod-pills"></div>
+
+    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--sub);margin:14px 0 8px">Train cards I previously marked as…</div>
+    <div class="mod-pills" id="test-filter-pills"></div>
+
+    <div class="setup-opts" style="margin-top:18px">
+      <label><input type="checkbox" id="test-smart"> 🧠 <strong>Smart mode</strong> — adaptive: prioritize cards you struggle with</label>
+    </div>
+    <div class="setup-opts">
+      <label><input type="checkbox" id="test-shuffle" checked> Shuffle order (ignored when Smart mode is on)</label>
+    </div>
+
+    <button class="btn-primary" onclick="startTest()">Start Test</button>
+  </div>
+
+  <!-- ACTIVE TEST -->
+  <div id="test-running" class="hide" style="width:100%">
+    <div id="t-smart-banner" class="smart-banner" style="display:none">🧠 <strong>Smart mode</strong> — cards ordered by your weakest first (based on history of judgments)</div>
+    <div class="quiz-stats">
+      <div class="qs g"><div class="qs-n" id="t-correct">0</div><div class="qs-l">Correct</div></div>
+      <div class="qs" style="color:var(--amber)"><div class="qs-n" id="t-partial" style="color:var(--amber)">0</div><div class="qs-l">Partial</div></div>
+      <div class="qs r"><div class="qs-n" id="t-wrong">0</div><div class="qs-l">Wrong</div></div>
+      <div class="qs"><div class="qs-n" id="t-skip">0</div><div class="qs-l">Skipped</div></div>
+      <div class="qs"><div class="qs-n" id="t-pct">—</div><div class="qs-l">Score</div></div>
+    </div>
+
+    <div class="cat-row">
+      <span class="cat-badge" id="t-cat">—</span>
+      <span class="src-badge" id="t-src" style="display:none">—</span>
+    </div>
+
+    <div class="test-prompt">
+      <div class="test-term" id="t-term">—</div>
+      <textarea class="test-input" id="t-input" placeholder="Type your answer here…"></textarea>
+      <div class="test-submit-row">
+        <button class="btn-skip" onclick="testSkip()">Skip</button>
+        <button class="btn-submit" id="t-submit-btn" onclick="testSubmit()">Submit ⌘+↵</button>
+      </div>
+
+      <div class="test-result" id="t-result">
+        <div class="test-verdict" id="t-verdict">
+          <span class="verdict-icon" id="t-verdict-icon">—</span>
+          <div style="flex:1">
+            <div id="t-verdict-text">—</div>
+            <div class="verdict-bar"><div class="verdict-bar-fill" id="t-verdict-fill" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <div class="test-answer-block">
+          <div class="tab-label">Correct Answer</div>
+          <div class="tab-text" id="t-answer">—</div>
+        </div>
+
+        <div class="test-judge-row">
+          <div class="hint">You can always override the suggestion below. <kbd>1</kbd> Wrong · <kbd>2</kbd> Partial · <kbd>3</kbd> Correct</div>
+          <button class="btn-judge btn-mark-wrong"   id="t-mark-wrong"   onclick="testJudge('w')">✗ Wrong</button>
+          <button class="btn-judge btn-mark-partial" id="t-mark-partial" onclick="testJudge('p')">◐ Partial</button>
+          <button class="btn-judge btn-mark-right"   id="t-mark-right"   onclick="testJudge('c')">✓ Correct</button>
+        </div>
+
+        <div class="test-next-row">
+          <button class="btn-test-next" id="t-next-btn" onclick="testNext()">Next Card →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <span class="nav-count" id="t-progress">Card 1 of —</span>
+    </div>
+
+    <div class="toolbar">
+      <button class="tb-btn" onclick="testEnd()">⏹ End Test</button>
+    </div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="test-result-screen" class="complete" style="display:none"></div>
+</div>
+
+<!-- ─── MOCK EXAM MODE ─── -->
+<div id="view-exam" class="hide" style="width:100%">
+  <div id="exam-start" class="start-card">
+    <div class="complete-icon">📝</div>
+    <h2>Mock Exam</h2>
+    <p>Simulates the decentral exam: <strong>45 randomly selected questions in 90 minutes</strong>. Each question is worth ~2 points. You can navigate between questions, change answers, and submit when done — or it auto-submits at time-up.</p>
+    <div class="start-stats">
+      <div class="c-box b"><div class="c-n">45</div><div class="c-l">Questions</div></div>
+      <div class="c-box b"><div class="c-n">90</div><div class="c-l">Minutes</div></div>
+      <div class="c-box b"><div class="c-n">90</div><div class="c-l">Points</div></div>
+    </div>
+    <button class="btn-primary" onclick="startExam()">Start Exam</button>
+  </div>
+
+  <div id="exam-running" class="hide" style="width:100%">
+    <div class="exam-header">
+      <h2 id="exam-progress">Question 1 of 45</h2>
+      <div class="timer" id="exam-timer">90:00</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" id="exam-q">Loading…</div>
+      <div class="quiz-opts" id="exam-opts"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" id="ebtn-prev" onclick="examPrev()">←</button>
+      <span class="nav-count" id="enav-count">1 / 45</span>
+      <button class="nav-btn" id="ebtn-next" onclick="examNext()">→</button>
+    </div>
+
+    <div class="toolbar">
+      <button class="tb-btn" onclick="submitExam()">📤 Submit Exam</button>
+    </div>
+  </div>
+
+  <div id="exam-result" class="complete" style="display:none"></div>
+</div>
+
+</main>
+
+<footer>
+  <kbd>Space</kbd> flip · <kbd>→</kbd> next · <kbd>←</kbd> prev · <kbd>1</kbd> still learning · <kbd>2</kbd> know it
+</footer>
+
+<!-- ADD / EDIT MODAL -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <h3 id="modal-title">Add Flashcard</h3>
+    <div class="field"><label>Term / Concept</label><input id="inp-term" type="text" placeholder="e.g. VRIO Framework"></div>
+    <div class="field"><label>Definition</label><textarea id="inp-def" placeholder="Full explanation shown on the back…"></textarea></div>
+    <div class="field-grid">
+      <div class="field"><label>Module</label>
+        <select id="inp-mod">
+          <option value="1">M1 — Fundamentals</option>
+          <option value="2">M2 — Outside / Inside</option>
+          <option value="3">M3 — Business & Corporate</option>
+          <option value="4">M4 — Innovation & BM</option>
+          <option value="5">M5 — Organizing & Change</option>
+        </select>
+      </div>
+      <div class="field"><label>Source</label>
+        <select id="inp-src">
+          <option value="">—</option>
+          <option value="Lecture">Lecture</option>
+          <option value="HBR">HBR Reading</option>
+          <option value="Guest">Guest Lecture</option>
+          <option value="Case">Case Study</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Category</label><input id="inp-cat" type="text" placeholder="e.g. Porter's Frameworks"></div>
+    <div class="modal-btns">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveCard()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═════════════════════════════════════════════════════════════
+// FLASHCARD DATA
+// ═════════════════════════════════════════════════════════════
+let ALL = [
+// ══ MODULE 1 ══════════════════════════════════════════
+{m:1,cat:"Fundamentals",src:"Lecture",term:"Basic Statement 1",def:"Strategic management focuses on explaining differences in firm performance."},
+{m:1,cat:"Fundamentals",src:"Lecture",term:"Basic Statement 2",def:"Differences in performance reflect differences in strategic choices — competitive advantage comes from being unique."},
+{m:1,cat:"Fundamentals",src:"Lecture",term:"Basic Statement 3",def:"Strategy is built on assumptions about the future that must be constantly tested and questioned."},
+{m:1,cat:"Fundamentals",src:"Lecture",term:"Strategic Management",def:"Explains why some companies are more profitable than others — how organizations gain and sustain competitive advantage over peers despite competition and imitation."},
+{m:1,cat:"Fundamentals",src:"Lecture",term:"Outside-in Perspective",def:"Build strategy by understanding the external environment: macro-environment, industry analysis, customer insights. Also called the 'market-based view.'"},
+{m:1,cat:"Fundamentals",src:"Lecture",term:"Inside-out Perspective",def:"Build competitive advantage from superior internal resources and capabilities — the resource-based view (RBV) of the firm."},
+{m:1,cat:"Fundamentals",src:"Lecture",term:"5 Levels of Strategy",def:"Corporate, Business Unit (SBU), Functional, Operational/Issue, and Network/Ecosystem level. Business unit strategy is the core, supported by the others."},
+{m:1,cat:"Fundamentals",src:"Lecture",term:"Who Is Responsible for Strategy?",def:"Board of management (sets direction, safeguards stakeholders) → Top management (implements, allocates resources) → Other employees (execute and evaluate)."},
+{m:1,cat:"Porter — What is Strategy?",src:"HBR",term:"Operational Effectiveness vs. Strategy",def:"OE = doing the same things better than rivals. Strategy = doing different things. OE alone cannot sustain advantage because best practices diffuse rapidly."},
+{m:1,cat:"Porter — What is Strategy?",src:"HBR",term:"Productivity Frontier",def:"Maximum value a firm can create at a given cost using best available technologies and practices. OE moves firms toward it, but rivals can imitate it."},
+{m:1,cat:"Porter — What is Strategy?",src:"HBR",term:"Strategy (Porter's Definition)",def:"'The creation of a unique and valuable position, involving a different set of activities.' Success depends on doing many things well and integrating them — fit among activities."},
+{m:1,cat:"Porter — What is Strategy?",src:"HBR",term:"3 Bases for Strategic Positioning",def:"1. Variety-based (subset of products/services, e.g. Jiffy Lube). 2. Needs-based (most needs of a specific group, e.g. Bessemer Trust). 3. Access-based (same needs, different access, e.g. Carmike)."},
+{m:1,cat:"Porter — What is Strategy?",src:"HBR",term:"Trade-offs in Strategy",def:"Incompatibilities where doing more of one thing requires doing less of another. Essential: they deter straddling and imitation, force real choices, protect positioning."},
+{m:1,cat:"Porter — What is Strategy?",src:"HBR",term:"3 Sources of Trade-offs",def:"1. Inconsistencies in image/reputation. 2. Activities themselves. 3. Limits on internal coordination — a single clear direction is required."},
+{m:1,cat:"Porter — What is Strategy?",src:"HBR",term:"3 Types of Fit (Porter)",def:"1. First-order: simple consistency between each activity and overall strategy. 2. Second-order: activities reinforce each other. 3. Third-order: activities optimized together as a system."},
+{m:1,cat:"Porter — What is Strategy?",src:"HBR",term:"Straddling",def:"Trying to match a competitor's position while keeping your existing one. Creates inconsistencies, dilutes the strategy, delivers the worst of both positions."},
+{m:1,cat:"Porter — What is Strategy?",src:"HBR",term:"Growth Trap",def:"Broadening strategy to serve more customers — erodes trade-offs, blurs positioning, ultimately destroys profitability (e.g. Maytag)."},
+{m:1,cat:"Competitive Advantage",src:"Lecture",term:"Sustained vs. Transient Advantage",def:"Sustained (Porter): unique position held long-term. Transient (McGrath): built quickly and abandoned just as fast — a portfolio of short-lived advantages. More relevant today."},
+{m:1,cat:"Competitive Advantage",src:"Lecture",term:"Dynamic Heterogeneity",def:"Firms differ from each other AND those differences change over time. Explains persistent performance differences from different strategic choices and resources."},
+{m:1,cat:"Measuring Success",src:"Lecture",term:"4 Elements of Performance",def:"Market, Financial, Social, Environmental. Modern strategy is judged on all four — not just financial returns."},
+{m:1,cat:"Measuring Success",src:"Lecture",term:"ESG Risk Reporting — 3 Buckets",def:"Environmental (E): climate, pollution, waste. Social (S): labor, diversity, communities. Governance (G): board structure, executive pay, anti-corruption."},
+{m:1,cat:"Measuring Success",src:"Lecture",term:"EU Taxonomy",def:"Classification system identifying environmentally sustainable economic activities. Guides investment → lower cost of capital for compliant companies, higher investor attractiveness."},
+{m:1,cat:"Measuring Success",src:"HBR",term:"Net-Zero by 2050 (Topping 2019)",def:"Firms should reach net-zero carbon emissions by 2050 to align with the 'science-based target initiative.' Aligning early is a strategic imperative."},
+{m:1,cat:"Measuring Success",src:"Lecture",term:"Greenium",def:"Firms pay LESS interest for green bonds linked to ESG performance compared to normal bonds — a 'green premium' in capital markets. Incentivizes sustainability."},
+{m:1,cat:"Measuring Success",src:"Lecture",term:"Net-Positive Company",def:"Gives more than it takes — owns all impacts (intended or not), creates positive returns for all stakeholders, operates for long-term benefit of business and society."},
+{m:1,cat:"Articulating Strategy",src:"Lecture",term:"Mission Statement",def:"Describes what you do, who you do it for, and the benefit it provides. Defines purpose — why the organization exists. Guides internal decisions, communicates identity externally."},
+{m:1,cat:"Articulating Strategy",src:"Lecture",term:"Vision Statement",def:"Concerned with the future the organization seeks to create. Pertains to where the organization hopes to be going. Should provide guidance and inspiration."},
+{m:1,cat:"Articulating Strategy",src:"Lecture",term:"Statement of Corporate Values",def:"Communicates the underlying and enduring core 'principles' that define how an organization should operate. Distinct from mission (what) and vision (where to)."},
+{m:1,cat:"Articulating Strategy",src:"Lecture",term:"Objectives / Goals",def:"Statements of visionary and SPECIFIC outcomes that are to be achieved. Measurable milestones toward the vision."},
+{m:1,cat:"Good vs. Bad Strategy",src:"Lecture",term:"Good Strategy",def:"Clear unique position, deliberate trade-offs, coherent activity system, regularly tested assumptions. Says what the firm does AND what it does not do."},
+{m:1,cat:"Good vs. Bad Strategy",src:"Lecture",term:"Bad Strategy",def:"Vague goals ('be the best'), no real trade-offs, tries to serve all customers, confuses OE with strategy, or exists only on paper."},
+
+// ══ MODULE 2 ══════════════════════════════════════════
+{m:2,cat:"Outside-in: Macro",src:"Lecture",term:"PESTEL Framework",def:"Macro-environment analysis: Political, Economic, Social, Technological, Ecological, Legal. Identifies external forces affecting all firms in an industry. Feeds the Opportunities/Threats side of SWOT."},
+{m:2,cat:"Outside-in: Macro",src:"Lecture",term:"SWOT Analysis — Principle",def:"Strengths/Weaknesses come from INTERNAL analysis (resource-based view). Opportunities/Threats come from EXTERNAL analysis (environmental models like PESTEL/5 Forces)."},
+{m:2,cat:"Outside-in: Industry",src:"HBR",term:"Porter's Five Forces",def:"Framework evaluating industry attractiveness via 5 competitive forces: Buyers, Suppliers, Substitutes, New Entrants, Existing Rivals. Determines profit potential of the industry."},
+{m:2,cat:"Outside-in: Industry",src:"HBR",term:"Two Factors of Firm Profitability (Porter)",def:"1. The OVERALL ATTRACTIVENESS of the industry (5 Forces). 2. The POSITION of the firm WITHIN that industry (cost leadership / differentiation)."},
+{m:2,cat:"Outside-in: Industry",src:"Lecture",term:"Bargaining Power of Buyers",def:"Buyers want to pay less and get more. High power → lower profitability. Increases with buyer concentration, low switching costs, commodity products."},
+{m:2,cat:"Outside-in: Industry",src:"Lecture",term:"Bargaining Power of Suppliers",def:"Suppliers want to be paid more and deliver less. High power → squeezed margins. Increases with supplier concentration, differentiated inputs, high switching costs."},
+{m:2,cat:"Outside-in: Industry",src:"Lecture",term:"Threat of Substitutes",def:"Products/services that can replace the industry's offering — not always obvious. High threat caps prices and limits industry profitability."},
+{m:2,cat:"Outside-in: Industry",src:"Lecture",term:"Threat of New Entrants",def:"New competitors entering the market erode profitability. Reduced by high barriers: capital, regulation, brand, economies of scale, switching costs."},
+{m:2,cat:"Outside-in: Industry",src:"Lecture",term:"Rivalry Among Existing Competitors",def:"Intense competition reduces profitability for all. Increases with many equal-sized rivals, slow growth, high fixed costs, low differentiation."},
+{m:2,cat:"Outside-in: Industry",src:"Lecture",term:"Challenges of 5 Forces Model",def:"Determining the right industry boundary, converging industries blurring lines, complementary organizations not captured in the original model."},
+{m:2,cat:"Outside-in: Industry",src:"Lecture",term:"Industry Life Cycle — 5 Phases",def:"Development → Growth → Shake-out → Maturity → Decline. Strategic options change with each phase (e.g. innovation, scale, consolidation, harvest)."},
+{m:2,cat:"Outside-in: Market",src:"Lecture",term:"Market Segmentation",def:"Grouping customers with similar needs that differ from other parts of the market. Criteria: socio-demographic, behavioral, psychological. Goal: tailored offerings per segment."},
+{m:2,cat:"Inside-out: Resources",src:"Lecture",term:"Resource-Based View (Key Quote)",def:"'Competitive advantages and better performance can be explained by the uniqueness of the resources and competencies of an organization.' Inside-out logic."},
+{m:2,cat:"Inside-out: Resources",src:"HBR",term:"VRIO Framework (Collis & Montgomery)",def:"Tool to identify resources that give sustainable competitive advantage. Resource must satisfy all 4: Valuable, Rare, Inimitable, supported by the Organization."},
+{m:2,cat:"Inside-out: Resources",src:"HBR",term:"V — Value (VRIO)",def:"Does the resource enable the firm to exploit an environmental opportunity and/or neutralize a threat?"},
+{m:2,cat:"Inside-out: Resources",src:"HBR",term:"R — Rarity (VRIO)",def:"Is the resource currently controlled by only a small number of competing firms?"},
+{m:2,cat:"Inside-out: Resources",src:"HBR",term:"I — Imitability (VRIO)",def:"Do firms without the resource face a cost disadvantage in obtaining or developing it?"},
+{m:2,cat:"Inside-out: Resources",src:"HBR",term:"O — Organization (VRIO)",def:"Are the firm's other policies and procedures organized to support the exploitation of its valuable, rare, and costly-to-imitate resources?"},
+{m:2,cat:"Dynamic Capabilities",src:"Lecture",term:"Dynamic Capabilities — Definition",def:"An organization's ability to renew and recreate its resources and capabilities to meet changing environments. Create, extend, or modify existing ordinary capabilities."},
+{m:2,cat:"Dynamic Capabilities",src:"Lecture",term:"3 Components of Dynamic Capabilities (Teece)",def:"1. SENSING (opportunities & threats). 2. SEIZING (capturing value from opportunities). 3. RECONFIGURING (transforming the asset base). Each has its own microfoundations."},
+{m:2,cat:"Dynamic Capabilities",src:"Lecture",term:"Microfoundations — SENSING",def:"Identifying target markets and changing customer needs; scanning for technological opportunities; analyzing supplier and competitor responses; processes to direct internal R&D."},
+{m:2,cat:"Dynamic Capabilities",src:"Lecture",term:"Microfoundations — SEIZING",def:"Delineating the business model; choosing decision-making protocols; building loyalty and commitment; selecting enterprise boundaries (make vs. buy)."},
+{m:2,cat:"Dynamic Capabilities",src:"Lecture",term:"Microfoundations — RECONFIGURING",def:"Knowledge management; Co-specialization (combining complementary assets); Governance; Decentralization. (NOTE: 'Change management' is NOT a microfoundation — common exam trap.)"},
+{m:2,cat:"Inside-out: Activities",src:"Lecture",term:"Value Chain",def:"'Describes the categories of activities within and around an organization that together create products or services.' Split into PRIMARY and SUPPORT activities."},
+{m:2,cat:"Inside-out: Activities",src:"Lecture",term:"Primary vs. Support Activities",def:"PRIMARY: directly create the product/service (inbound logistics, operations, outbound logistics, marketing & sales, service). SUPPORT: improve effectiveness of primary (procurement, HR, technology, infrastructure)."},
+{m:2,cat:"Inside-out: Activities",src:"Lecture",term:"Activity System",def:"Describes how an organization meets the critical success factors of its industry. A map of interconnected strategic activities that reinforce each other (Porter)."},
+{m:2,cat:"Inside-out: Activities",src:"Lecture",term:"Value System",def:"Inter-organizational connections needed to create products/services — extends the value chain across firm boundaries (suppliers, distributors, customers)."},
+{m:2,cat:"Ecosystems",src:"HBR",term:"Ecosystem (Jacobides Definition)",def:"A set of actors with multilateral, non-generic complementarities that are not fully hierarchically controlled. Multiple actors contribute to a focal firm's value proposition."},
+{m:2,cat:"Ecosystems",src:"Lecture",term:"Modularity & Complementarity",def:"Modularity enables markets and supply chains by allowing independent component creation. Adding complementarities enables ecosystems to emerge around a shared value proposition."},
+{m:2,cat:"Ecosystems",src:"HBR",term:"Jacobides — 5 Ecosystem Questions",def:"1. Can you help OTHERS create value? 2. What role should you play? 3. How to provide access & attract complementors? 4. Can your organization adapt? 5. How many ecosystems to manage?"},
+{m:2,cat:"Ecosystems",src:"HBR",term:"Jacobides — NOT a Recommendation",def:"Becoming the central orchestrator is NOT generically recommended. You don't always need to be central — sometimes adding value as a complementor is better."},
+
+// ══ MODULE 3 ══════════════════════════════════════════
+{m:3,cat:"Business Strategy",src:"Lecture",term:"Strategic Business Unit (SBU)",def:"The 'heart' of strategy — where key resources are bundled for competitive advantage. Has authority to formulate strategies to compete within its market, but adheres to corporate-level decisions about WHICH markets."},
+{m:3,cat:"Business Strategy",src:"Lecture",term:"Cost Leadership Strategy",def:"Lowest costs in the industry while meeting minimum quality (parity & proximity). 4 sources (Porter): low input costs, economies of scale, experience/learning curve, product/process design."},
+{m:3,cat:"Business Strategy",src:"Lecture",term:"4 Sources of Cost Leadership (Porter)",def:"1. Low INPUT costs (e.g. low-wage locations). 2. ECONOMIES OF SCALE (increasing scale reduces average costs). 3. EXPERIENCE / learning curve (cumulative learning lowers costs). 4. PRODUCT / PROCESS DESIGN (designing for efficiency)."},
+{m:3,cat:"Business Strategy",src:"Lecture",term:"Differentiation Strategy",def:"Offer unique attributes customers value above cost. 2 requirements: (1) additional costs < gains in price premium; (2) sustain the quality difference long-term."},
+{m:3,cat:"Business Strategy",src:"Lecture",term:"Focus Strategy",def:"Serve a narrow segment with either cost leadership or differentiation. Requirements: distinct segment needs, distinct value chains, viable segment economics."},
+{m:3,cat:"Business Strategy",src:"Lecture",term:"Stuck in the Middle (U-Curve)",def:"Firms that are neither cost leaders nor differentiated achieve no clear competitive advantage and earn below-average returns. The two extremes are profitable, the middle is not."},
+{m:3,cat:"Business Strategy",src:"Lecture",term:"Hybrid Strategy",def:"Simultaneously combines elements of cost leadership and differentiation. Enabled by people/culture, technology, ecosystems, and strategic investments. Increasingly common in dynamic environments."},
+{m:3,cat:"Business Strategy",src:"Lecture",term:"Types of Hybrid Strategy",def:"1. SEQUENTIAL — target different segments over time (e.g. Bosch). 2. MULTI-LOCAL — different brands for different segments (e.g. Migros + Denner). 3. SIMULTANEOUS — both at once (e.g. Uber)."},
+{m:3,cat:"Platform Strategy",src:"HBR",term:"Pipeline vs. Platform — 3 Shifts (Van Alstyne 2016)",def:"1. From resource CONTROL → resource ORCHESTRATION. 2. From internal OPTIMIZATION → external INTERACTION. 3. From focus on customer VALUE → focus on ECOSYSTEM value."},
+{m:3,cat:"Platform Strategy",src:"HBR",term:"Platform Strategy — 4 Steps",def:"1. Choose market sides. 2. Solve the chicken-or-egg problem (coring or subsidy). 3. Design business model (incl. profit generation). 4. Establish and enforce ecosystem rules (governance)."},
+{m:3,cat:"Platform Strategy",src:"HBR",term:"Chicken-or-Egg Problem",def:"Platforms need both sides for value, but each side joins only if the other is present. Solved by providing stand-alone value for one side ('coring') or subsidizing one side."},
+{m:3,cat:"Platform Strategy",src:"HBR",term:"New Platform Metrics (Van Alstyne 2016)",def:"Match quality, Interaction failure, Engagement, and Negative network effects. (NOTE: Click-through rate is NOT a new platform-specific metric — that's a pipeline-era metric.)"},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"Corporate Strategy",def:"Decides which businesses the firm should be in and how the HQ adds value beyond the sum of business units ('corporate parenting'). Aims to create a corporate SURPLUS, not a discount."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"3 Generic Types of Corporate Strategy",def:"1. PORTFOLIO MANAGER (financial control, e.g. Berkshire Hathaway). 2. SYNERGY MANAGER (sharing skills/assets across SBUs, e.g. Walt Disney). 3. PARENTAL DEVELOPER (HQ adds value via parenting capabilities)."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"Types of Synergies",def:"OPERATIONAL (VW modular kit), MANAGEMENT (LVMH HQ capabilities), MARKET POWER (Walt Disney cross-unit integration), LEVERAGING for new markets (Philips: medical + consumer electronics)."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"Corporate Discount — Sources",def:"All of these reduce corporate value: (1) Intervention by HQ in SBUs, (2) Increasing bureaucratic complexity, (3) Additional management costs. HQ must add more value than these costs to create a surplus."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"BCG Matrix",def:"Portfolio tool plotting SBUs on market growth (y) vs. relative market share (x): Stars (high/high), Cash Cows (low/high), Question Marks (high/low), Dogs (low/low)."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"BCG — Stars",def:"High market growth + high relative market share. Strong position in growing market — invest to maintain leadership; become future Cash Cows."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"BCG — Cash Cows",def:"Low market growth + high relative market share. Generate more cash than needed — fund Stars and Question Marks. Strategy: protect and harvest."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"BCG — Question Marks",def:"High market growth + low relative market share. Uncertain — invest selectively to become Stars or divest. Requires careful strategic decision."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"BCG — Dogs",def:"Low market growth + low relative market share. Typically no clear competitive advantage — consider divesting, restructuring, or harvesting."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"4 Diversification Strategies (Ansoff)",def:"Combinations of existing/new MARKETS × existing/new PRODUCTS: (1) Market Penetration, (2) Market Development, (3) Product Development, (4) Diversification (related or unrelated)."},
+{m:3,cat:"Strategy & Society",src:"Lecture",term:"Stakeholder Theory",def:"'If a firm creates value for its stakeholders, it will create value for its shareholders.' Managers balance financial interests against other stakeholders' interests."},
+{m:3,cat:"Strategy & Society",src:"Lecture",term:"Shareholder Theory (Friedman)",def:"'The only social responsibility of business is to increase its profits.' Social development is best left to governments; managers must maximize shareholder value."},
+{m:3,cat:"Strategy & Society",src:"Lecture",term:"Embedded View",def:"More accurate: ECONOMY is nested within SOCIETY, which is nested within ENVIRONMENT — not three separate rings. Implies firms can't ignore society or planet."},
+{m:3,cat:"Strategy & Society",src:"Lecture",term:"CSR-Related Concepts",def:"Governance (prevent abuse), Citizenship (protect civil rights), Philanthropy (fund outside causes), CSR (voluntary positive activities), Sustainability (competitive advantage VIA sustainable development)."},
+
+// ══ MODULE 4 ══════════════════════════════════════════
+{m:4,cat:"Innovation Strategy",src:"Lecture",term:"Innovation Landscape Map",def:"Tool to choose innovation projects, mapping 4 types on Business Model (existing/new) × Technological Competence (existing/new): Routine, Disruptive, Radical, Architectural."},
+{m:4,cat:"Innovation Strategy",src:"Lecture",term:"4 Questions for Innovation Allocation",def:"1. Growth potential of current market? 2. Status of customer needs? 3. Potential remaining in technological competences? 4. Can you create barriers to imitation?"},
+{m:4,cat:"Innovation Types",src:"Lecture",term:"Routine Innovation",def:"Existing BM + existing TC. Current markets still growing, customer needs unsatiated, strong imitation barriers. Improve existing products for current customers — firms' 'home court.'"},
+{m:4,cat:"Innovation Types",src:"Lecture",term:"Disruptive Innovation (Innovation Landscape)",def:"NEW business model + existing TC. Market growth slowing, customers value new attributes, early mover advantage. Initially performs worse on traditional metrics but targets new value."},
+{m:4,cat:"Innovation Types",src:"Lecture",term:"Radical Innovation",def:"Existing BM + NEW technological competence. New technology applied to current customers/market. Requires major TC investment, strong protection possible."},
+{m:4,cat:"Innovation Types",src:"Lecture",term:"Architectural Innovation",def:"NEW business model AND NEW technological competence simultaneously. Most ambitious — requires both with strong barriers to imitation."},
+{m:4,cat:"Innovation Sources",src:"Lecture",term:"Innovation Funnel",def:"Process from idea generation (RESEARCH) to market launch (DEVELOPMENT). Only the best ideas survive. Sources can be internal (R&D) or external (open innovation)."},
+{m:4,cat:"Innovation Sources",src:"Lecture",term:"VUCA World",def:"Volatile, Uncertain, Complex, Ambiguous — the environment modern strategy operates in. Makes closed internal innovation too slow, risky, and complex for a single org."},
+{m:4,cat:"Open Innovation",src:"Lecture",term:"Open Innovation",def:"Extending the innovation process beyond organizational boundaries. Ideas and knowledge flow in AND out. Sources: crowdsourcing, universities, startups, suppliers, competitors."},
+{m:4,cat:"Open Innovation",src:"Lecture",term:"4 Types of Open Innovation Processes",def:"1. OUTSIDE-IN — knowledge flows in (e.g. crowdsourcing). 2. INSIDE-OUT — knowledge flows out (e.g. licensing). 3. COUPLED — bidirectional (e.g. alliances). 4. CORPORATE VENTURING — invest in / build startups."},
+{m:4,cat:"Open Innovation",src:"Lecture",term:"4 Startup Engagement Models",def:"1. ACQUIRE startups (M&A). 2. INVEST as Corporate VC. 3. PARTNER (alliances, joint ventures). 4. BUILD via internal incubators / venture studios. Choice depends on goal, control needed, and timeline."},
+{m:4,cat:"Open Innovation",src:"HBR",term:"Open-Source Developer Motivations (Dahlander & Wallin 2015)",def:"Typical motivations: labor market signaling; ethical concerns; opposing closed software that can't be inspected; learning. (NOT 'accessing complementary skills and assets' — that's a firm motivation.)"},
+{m:4,cat:"Disruption",src:"HBR",term:"Innovator's Dilemma (Christensen)",def:"Successful, well-managed companies fail in the face of disruptive innovation because disruptive products initially serve small/niche markets that rational incumbents justifiably ignore."},
+{m:4,cat:"Disruption",src:"HBR",term:"Sustaining vs. Disruptive Innovation",def:"SUSTAINING: enhances performance along metrics existing customers value. DISRUPTIVE: initially worse on key metrics, targets overlooked niches, evolves to meet future customer needs."},
+{m:4,cat:"Disruption",src:"HBR",term:"Christensen & Overdorf (2000) Integration Matrix",def:"2×2 of values fit × resources fit: HIGH values + HIGH resources → integrate, existing staff. HIGH values + LOW resources → integrate, NEW staff. LOW values + HIGH resources → NEW unit, existing staff. LOW values + LOW resources → NEW unit, NEW staff (full spin-off)."},
+{m:4,cat:"Disruption",src:"Lecture",term:"Diffusion S-Curve",def:"How innovations spread: slow initial adoption → rapid acceleration → plateau. Key decisions: timing of tipping point (ramp up), plateau (cut investment), tripping point (predict decline)."},
+{m:4,cat:"Disruption",src:"Lecture",term:"Double S-Curve",def:"Biggest challenge for established companies: jumping from a maturing S-curve to a new one BEFORE the current one peaks. Most established firms fail to make this leap."},
+{m:4,cat:"Disruption",src:"Lecture",term:"5 Elements of First-Mover Advantage",def:"1. Experience curve. 2. Scale benefits. 3. Pre-emption of scarce resources. 4. Reputation / brand. 5. Buyer switching costs. (NOTE: 'Differentiation' is NOT one of the five — common trap.)"},
+{m:4,cat:"Innovation Concepts",src:"Lecture",term:"Product vs. Process Innovation",def:"In TRADITIONAL industries, product innovation dominates BEFORE the dominant design is established. Once the dominant design emerges, process innovation takes over to drive efficiency."},
+{m:4,cat:"Innovation Concepts",src:"Lecture",term:"Technology Push vs. Market Pull",def:"PUSH: technology is available; designers create products to use it. PULL: marketing research insights translate into new products. Both can involve new tech and refinement — they're not mutually exclusive."},
+{m:4,cat:"Innovation Concepts",src:"HBR",term:"Pisano Capability Matrix",def:"Strategic choice × capabilities, axes = Capability TYPE (Domain or Application) × Capability GOAL (Fortifying = deepen, Expanding = broaden). DEEPENING strategies: Domain Fortifying + Application Fortifying."},
+{m:4,cat:"Business Models",src:"HBR",term:"Business Model (Casadesus-Masanell)",def:"Describes the rationale of how an organization CREATES, DELIVERS, and CAPTURES value. Visualized with the Magic Triangle."},
+{m:4,cat:"Business Models",src:"Lecture",term:"Magic Triangle (Business Model)",def:"4 dimensions: WHO is served (customer segments) + WHAT is offered (value proposition) + HOW it's delivered (value chain) + WHY profitable (revenue model)."},
+{m:4,cat:"Business Models",src:"Lecture",term:"Business Model Innovation",def:"Competition increasingly between BUSINESS MODELS, not just products. Major successes (Amazon, Netflix, Airbnb, Uber) are BM innovations. Yet only ~10% of corporate innovation investment goes to BMI."},
+{m:4,cat:"Business Models",src:"Lecture",term:"Strategies for New Business Models",def:"TRANSFER (apply existing BM to new context), COMBINE (merge two BMs), LEVERAGE (extend existing BM into adjacent areas)."},
+
+// ══ MODULE 5 ══════════════════════════════════════════
+{m:5,cat:"Organizational Structure",src:"Lecture",term:"Structure Follows Strategy (Chandler)",def:"Organizational structure must be designed to implement strategy. Misalignment causes inefficiency. Chandler's principle: structure is the dependent variable."},
+{m:5,cat:"Organizational Structure",src:"Lecture",term:"Functional Structure",def:"2 levels: CEO + functional departments. ADV: clear responsibilities, specialist expertise, concentration of expertise. DIS: CEO overloaded, coordination difficult, hard to adapt to diversity."},
+{m:5,cat:"Organizational Structure",src:"Lecture",term:"Multidivisional Structure",def:"Divisions organized by product/geography — 'mini-companies.' ADV: flexible, performance-controlled, training in strategic view. DIS: duplication, silo risk, loss of central control."},
+{m:5,cat:"Organizational Structure",src:"Lecture",term:"Matrix Structure",def:"Combines two dimensions (e.g. geography + division). ADV: integrates knowledge, flexible, dual dimensions. DIS: high conflict (two bosses), slow decisions, UNCLEAR responsibilities (NOT clear — common trap)."},
+{m:5,cat:"Organizational Structure",src:"Lecture",term:"Project-Based Structure",def:"Temporary teams for specific projects. ADV: highly flexible, effective knowledge exchange, accountability. DIS: hinders knowledge accumulation across projects, often poorly coordinated."},
+{m:5,cat:"Organizational Structure",src:"Lecture",term:"Multinational Structure",def:"Two dimensions: degree of global coordination required × degree of local responsiveness required. Different combinations yield Global, Multi-domestic, International, or Transnational forms."},
+{m:5,cat:"Leadership",src:"Lecture",term:"Leadership — Definition",def:"The conscious process of influencing an organization (or group) in its effort toward achieving a common goal — coordinating efforts toward shared objectives."},
+{m:5,cat:"Leadership",src:"Lecture",term:"3 Leadership Styles (Continuum)",def:"Authoritarian/Instructional (top-down command) → Transactional (carrot-and-stick, mgmt by exception) → Transformational (intrinsic motivation, vision-driven). Strategic change requires more transformational."},
+{m:5,cat:"Leadership",src:"Lecture",term:"Transactional Leadership",def:"Based on EXTRINSIC motivation: clear exchanges (rewards for performance, penalties for failure). Includes 'management by exception' — intervening only when standards aren't met. Suitable for stable contexts."},
+{m:5,cat:"Leadership",src:"Lecture",term:"Transformational Leadership",def:"Triggers followers' INTRINSIC motivation through vision and personal connection. Followers identify with the leader. 4 mechanisms: Charisma, Inspiration, Intellectual Stimulation, Individual Consideration. (Does NOT use management by exceptions.)"},
+{m:5,cat:"Leadership",src:"Lecture",term:"Charisma (Transformational)",def:"Leader is admired, respected, and trusted. Followers identify with the leader and want to emulate them."},
+{m:5,cat:"Leadership",src:"Lecture",term:"Inspiration (Transformational)",def:"Leader provides meaning and motivates through shared vision. Followers commit to the vision and want to meet its requirements."},
+{m:5,cat:"Leadership",src:"Lecture",term:"Intellectual Stimulation (Transformational)",def:"LEADER stimulates rethinking of old ways, provides intellectual challenges, sparks creativity. FOLLOWERS become intrapreneurs. (Note: 'being an intrapreneur' is a follower outcome, NOT a leader activity.)"},
+{m:5,cat:"Leadership",src:"Lecture",term:"Individual Consideration (Transformational)",def:"Leader coaches and mentors, accepts individual differences, pays personalized attention. Followers develop their higher potential."},
+{m:5,cat:"Evaluating Strategy",src:"HBR",term:"Balanced Scorecard (Kaplan & Norton)",def:"Strategy execution tracking tool monitoring 4 perspectives simultaneously: Customer, Financial, Internal Business Processes, Learning & Growth."},
+{m:5,cat:"Evaluating Strategy",src:"HBR",term:"4 Perspectives of the Balanced Scorecard",def:"CUSTOMER (delivery, service quality), FINANCIAL (margins, cash flows), BUSINESS PROCESSES (OE, IP), LEARNING & GROWTH (R&D, innovation, talent)."},
+{m:5,cat:"Evaluating Strategy",src:"Lecture",term:"SAFe Criteria",def:"Framework for evaluating strategic options: SUITABILITY (does it address the situation?), ACCEPTABILITY (are returns vs. risks acceptable?), FEASIBILITY (can it be implemented?)."},
+{m:5,cat:"Evaluating Strategy",src:"Lecture",term:"Gap Analysis",def:"Identifies the gap between current state and desired future state. Triggers strategy revision when performance falls short of goals."},
+{m:5,cat:"Strategy Development",src:"Lecture",term:"5 Approaches to Strategy Development",def:"1. COMMAND (top-down goals, predictable). 2. STRATEGIC PLANNING (systematic, large firms). 3. GUIDED EVOLUTION (mgmt guides bottom-up initiatives). 4. SYMBOLIC (vision-driven, founder-active). 5. SELF-ORGANIZATION (decentralized grass-roots)."},
+{m:5,cat:"Strategy Development",src:"Lecture",term:"Strategic Planning — Pros & Cons",def:"PROS: systematic search, rational, coordinates toward goals, improves communication. CONS: relies on uncertain forecasts, bureaucratic, separates thinking from doing, periodic vs. continuous, slow."},
+{m:5,cat:"Strategy Development",src:"Lecture",term:"Intended vs. Emergent vs. Realized Strategy",def:"INTENDED: result of top management's considered intentions. EMERGENT: develop over time, not from a grand plan. REALIZED: what actually happens — often diverges from intended. Intended and emergent are NOT mutually exclusive."},
+{m:5,cat:"Strategy Development",src:"Lecture",term:"How Strategies Emerge",def:"Strategies can emerge through: EXPERIMENTATION (trial and error), BARGAINING (negotiation between actors), and ORGANIZATIONAL SYSTEMS (routines, processes shaping outcomes)."},
+{m:5,cat:"Strategy Development",src:"HBR",term:"Open Strategy (Stadler 2021)",def:"Involving internal and external stakeholders in strategy formation. Two dimensions: TRANSPARENCY (making strategy visible) and INCLUSION (extent stakeholders are consulted)."},
+{m:5,cat:"Strategy Development",src:"HBR",term:"Open Strategy — Central Dilemmas",def:"1. PROCESS dilemma: wider access vs. speed/flexibility/control. 2. DISCLOSURE: transparency vs. secrecy. 3. EMPOWERMENT: stakeholder voice vs. management authority. 4. ESCALATING COMMITMENT: building consensus vs. ability to change course. 5. GOVERNANCE: formal contracts vs. informal trust."},
+{m:5,cat:"Strategy Development",src:"HBR",term:"Open Strategy Tools (Stadler 2021)",def:"For GENERATING strategic ideas: Trend Radar + Competitions. For STRATEGY EXECUTION: Jams (large-scale collaborative online events). Different tools for different stages of the open strategy process."},
+{m:5,cat:"Strategic Change",src:"Lecture",term:"Two Complementary Tasks of Strategy (Double-S)",def:"1. 'RUNNING THE FIRM' — strategic planning, formulation & implementation of existing positioning. 2. 'CHANGING THE FIRM' — entrepreneurial mode: variation, selection, retention of new initiatives."},
+{m:5,cat:"Strategic Change",src:"Lecture",term:"Change Kaleidoscope — 8 Factors",def:"Contextual factors shaping the right change approach: Time, Scope, Preservation, Diversity, Capability, Capacity, Readiness, Power."},
+{m:5,cat:"Strategic Change",src:"HBR",term:"4 Pillars of Digital Transformation (Furr 2022)",def:"1. IT UPLIFT (modernizing IT foundation). 2. DIGITIZING OPERATIONS. 3. DIGITAL MARKETING (data-driven customer engagement). 4. NEW DIGITAL BUSINESSES (new BMs enabled by digital)."},
+{m:5,cat:"Strategic Change",src:"HBR",term:"IT Uplift — Required Capabilities (Furr 2022)",def:"To deliver IT uplift: Data Analytics, IT Architects, DevOps Teams. (NOTE: 'Change management' is NOT listed as an IT-uplift capability — common exam trap.)"},
+{m:5,cat:"Strategic Change",src:"Lecture",term:"Digital Transformation Challenge",def:"~90% of executives expect significant digital disruption, but only ~44% are adequately preparing. Most firms envision transformation but struggle to implement it ('PoC graveyard')."},
+{m:5,cat:"Strategic Change",src:"Lecture",term:"Twin Transition",def:"Digital and sustainability transitions must happen together: exponential rise of digital data mirrors the exponential decrease in CO2 emissions needed for net-zero."},
+
+// ══ GUEST LECTURES ══════════════════════════════════════
+{m:3,cat:"Guest Lecture — MOOST",src:"Guest",term:"MOOST — Beachhead Market Strategy",def:"Startups should pick a narrow 'beachhead' market segment, dominate it, then expand. MOOST started with Swiss energy retailers as beachhead, then penetrated via multipliers (B2B2C SaaS) before going broader."},
+{m:3,cat:"Guest Lecture — MOOST",src:"Guest",term:"MOOST — B2B2C SaaS Model",def:"Selling to Energy Providers (B2B) who then provide the AI Energy Assistant to their customers (C). Creates value for everyone: provider, end-customer, and environment (~1.3 Mt CO2 reductions targeted)."},
+{m:4,cat:"Guest Lecture — ABB",src:"Guest",term:"ABB — Corporate to Business-Driven Innovation",def:"Erich Labuda's talk: large industrials transitioning from centralized corporate innovation to distributed, business-unit-driven innovation closer to customers and markets. Emphasizes collaboration with startups."},
+
+// ══ EXPANSION PACK — DEEPER COVERAGE ══════════════════════
+// MODULE 1 — additions
+{m:1,cat:"Strategy Professionals",src:"Lecture",term:"What Strategy Professionals Do",def:"6 activities: (1) Strategic Analyses (industry/competitor/trend), (2) Strategic Plans, (3) Strategic Issue Selling (packaging, coalition-building, timing), (4) Strategic Decision-Making, (5) Strategy Communication, (6) Strategy Workshops & Strategic Projects."},
+{m:1,cat:"Strategy Professionals",src:"Lecture",term:"Stakeholders Influencing Strategy",def:"Strategy is influenced by shareholders, employees, customers, suppliers, government/regulators, NGOs/civil society, media, and competitors. Strategy professionals must engage these stakeholders, not just senior leadership."},
+{m:1,cat:"Measuring Success",src:"Lecture",term:"Race to Net Zero",def:"Global push toward net-zero GHG emissions by 2050. Strategically relevant: regulatory pressure (EU 2030 climate goals), capital markets (greenium, ESG reporting), customer expectations, talent attraction, and stranded-asset risk for laggards."},
+{m:1,cat:"Measuring Success",src:"Lecture",term:"Circular Economy",def:"Economic model based on reuse, repair, remanufacture, recycling — closing material loops. Contrasts the linear 'take-make-waste' model. Strategic implication: rethinking business models around durability and material recovery."},
+{m:1,cat:"Measuring Success",src:"Lecture",term:"Benefit Corporation (B Corp)",def:"Certified firms that meet rigorous standards of social/environmental performance, transparency, and accountability. Aim: transform the economic system into a 'more inclusive, equitable, and regenerative global economy.'"},
+{m:1,cat:"Measuring Success",src:"Lecture",term:"5 Traits of Net-Positive Companies",def:"(1) Take OWNERSHIP of all impacts, intended or not. (2) Reward shareholders via long-term, multi-stakeholder model. (3) Create positive returns for ALL stakeholders. (4) Operate for long-term benefit of business AND society. (5) Partner with competitors, critics, civil society, governments to tackle systemic problems."},
+{m:1,cat:"Competitive Advantage",src:"Lecture",term:"Two Ways to Maintain Competitive Advantage",def:"Maintain it over time via: (1) BARRIERS TO IMITATION (resource-based: causal ambiguity, path dependency, social complexity) OR (2) DYNAMIC ADAPTATION (continuously creating new advantages as old ones erode — McGrath's transient advantage logic)."},
+{m:1,cat:"Articulating Strategy",src:"Lecture",term:"Difference: Mission vs. Vision vs. Values vs. Objectives",def:"MISSION = what the org IS THERE for (purpose). VISION = the FUTURE it seeks to create. VALUES = enduring CORE PRINCIPLES guiding behavior. OBJECTIVES = SPECIFIC, MEASURABLE outcomes to achieve. Common exam trap: vision is often confused with mission."},
+
+// MODULE 2 — additions
+{m:2,cat:"PESTEL",src:"Lecture",term:"PESTEL — Political",def:"Role of the state and political forces: government stability, political movements, interest groups, affected media, regulatory bodies, trade policy."},
+{m:2,cat:"PESTEL",src:"Lecture",term:"PESTEL — Economic",def:"Macroeconomic factors: exchange rates, interest rates, inflation, economic cycles, GDP growth, consumer spending power."},
+{m:2,cat:"PESTEL",src:"Lecture",term:"PESTEL — Social",def:"Cultural and demographic factors: aging societies, changing values, lifestyle trends, education levels, workforce composition."},
+{m:2,cat:"PESTEL",src:"Lecture",term:"PESTEL — Technological",def:"Internet, IoT, digitalization, AI, automation, biotech — tech changes that reshape industries or create new ones."},
+{m:2,cat:"PESTEL",src:"Lecture",term:"PESTEL — Ecological",def:"Environmental issues: pollution, waste, climate change, biodiversity, resource scarcity. Increasingly material to business strategy."},
+{m:2,cat:"PESTEL",src:"Lecture",term:"PESTEL — Legal",def:"Legislative and regulatory restrictions or changes: competition law, labor law, IP, consumer protection, sector-specific regulation."},
+{m:2,cat:"Outside-in: Market",src:"Lecture",term:"Segmentation Criteria",def:"(1) SOCIO-DEMOGRAPHIC (age, gender, income, education); (2) BEHAVIORAL (purchase patterns, usage, brand loyalty); (3) PSYCHOLOGICAL (values, opinions, needs, expectations, lifestyle). Combine via 2×2 or 3×3 matrices."},
+{m:2,cat:"Outside-in: Market",src:"Lecture",term:"Segmentation — Good Practice",def:"Define a manageable number of meaningful segments (not too many), link criteria, ensure segments are distinct and economically viable, then adopt segment-specific offerings or specialization."},
+{m:2,cat:"Inside-out: Resources",src:"Lecture",term:"Tangible vs. Intangible Resources",def:"TANGIBLE: physical/financial assets (plants, equipment, cash, inventory). INTANGIBLE: brand, patents, trademarks, organizational culture, knowledge, relationships. Intangibles are often the source of sustainable competitive advantage."},
+{m:2,cat:"Inside-out: Resources",src:"Lecture",term:"VRIO — From Capability to Core Competence",def:"A capability becomes a CORE COMPETENCE only when it passes all 4 VRIO tests. Resources → capabilities (organized use of resources) → core competences (sustainable advantage). Each successive level is rarer."},
+{m:2,cat:"Dynamic Capabilities",src:"Lecture",term:"3 Generic Types of Dynamic Capabilities",def:"Teece's framework: (1) SENSING opportunities and threats, (2) SEIZING value from opportunities, (3) RECONFIGURING/transforming the asset base to maintain competitiveness as the environment changes."},
+{m:2,cat:"Ecosystems",src:"Lecture",term:"Ecosystem — Key Implications",def:"'The firm is no longer an independent strategic actor.' Its success depends on collaboration with other firms in an ecosystem spanning multiple sectors. The ecosystem concept may substitute for 'industry' in strategic analysis."},
+{m:2,cat:"Ecosystems",src:"Lecture",term:"Ecosystem — 3 Defining Properties",def:"(1) MULTIPLE actors contributing to the focal firm's value proposition. (2) ECONOMIC complementarities — others' offers enhance user value. (3) STRUCTURAL interdependencies — actors' offers must connect for value to materialize."},
+
+// MODULE 3 — additions
+{m:3,cat:"Business Strategy",src:"Lecture",term:"Creating Competitive Advantage — 3 Conditions",def:"(1) Create VALUE for customers. (2) That value must be GREATER than what it costs to create. (3) That value must be SUPERIOR to that of rivals. All three must hold simultaneously."},
+{m:3,cat:"Business Strategy",src:"Lecture",term:"SBU Criteria",def:"For a unit to qualify as an SBU it should: (1) serve a distinctive product-market domain, (2) have its own competitors, (3) have full control over the resources needed to execute its strategy, (4) have measurable P&L responsibility."},
+{m:3,cat:"Business Strategy",src:"Lecture",term:"Differentiation — Sources",def:"Product features, quality, brand image, customer service, distribution channels, design, customization, complementary services. Goal: deliver attributes customers value enough to pay a premium for."},
+{m:3,cat:"Business Strategy",src:"Lecture",term:"Generic Strategy Examples",def:"DIFFERENTIATION: Apple, Starbucks. DIFFERENTIATION FOCUS: Tesla, Rolex. COST LEADERSHIP: Walmart, Amazon. COST FOCUS: Aldi, Ryanair."},
+{m:3,cat:"Business Strategy",src:"Lecture",term:"How to Follow a Hybrid Strategy",def:"(1) Harness the power of people and culture. (2) Make good use of technology. (3) Utilize the power of business ecosystems. (4) Make investment decisions strategically. Particularly relevant in dynamic environments."},
+{m:3,cat:"Platform Strategy",src:"Lecture",term:"Digital Competition — Key Shift",def:"From thinking 'products' to thinking 'PLATFORMS.' Value comes from network effects and ecosystem orchestration, not just the focal firm's value chain. The internet continues to evolve, forcing strategic adaptation."},
+{m:3,cat:"Platform Strategy",src:"Lecture",term:"Platform — Choose Market Sides",def:"Decide which sides should participate and which should not. Attract third-party innovators (complementors). Example: Apple chose two sides — Users + Developers."},
+{m:3,cat:"Platform Strategy",src:"Lecture",term:"Platform — Solve Chicken-or-Egg",def:"Two main strategies: (1) CORING — provide standalone value to one side first (e.g. Amazon starting with selling books); (2) SUBSIDIZE one side to attract the other."},
+{m:3,cat:"Platform Strategy",src:"Lecture",term:"Platform — Design Business Model",def:"Choose revenue mechanism: increase users' willingness to pay; charge complementors for access; take portion of sales. Example: Sony charges a licensing fee on every game sold for PlayStation."},
+{m:3,cat:"Platform Strategy",src:"Lecture",term:"Platform — Enforce Ecosystem Rules",def:"Decide on openness of interfaces, who can connect/innovate, ensure quality of complements, pursue the overall good of the ecosystem. Example: Uber checks driver licenses and runs background checks."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"Corporate Surplus vs. Corporate Discount",def:"Corporate HQ creates SURPLUS when it adds more value than the costs and complications it imposes on SBUs. It creates DISCOUNT when its interventions, bureaucracy, and management costs exceed the value it adds."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"Portfolio Manager",def:"Corporate strategy type: HQ acts as a financial investor — minimal intervention, focuses on capital allocation and acquiring/divesting based on financial returns (e.g. Berkshire Hathaway)."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"Synergy Manager",def:"Corporate strategy type: HQ actively seeks and exploits synergies BETWEEN SBUs (shared resources, capabilities, customers). Example: Walt Disney integrating studios, parks, merchandise."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"Parental Developer",def:"Corporate strategy type: HQ uses its own distinctive capabilities to DEVELOP each SBU — adds value through parenting skills (e.g. brand management, leadership development, operational excellence)."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"Operational Synergies",def:"Sharing physical resources/processes across SBUs to reduce costs or improve efficiency. Example: Volkswagen's MODULAR ASSEMBLY KIT used across brands (VW, Audi, Škoda, SEAT)."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"Management Synergies",def:"Leveraging HQ's distinctive managerial capabilities across SBUs. Example: LVMH — luxury brand management skills, creative talent development, classic brand support."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"Market Power Synergies",def:"Coordinated cross-unit action to strengthen market position. Example: Walt Disney — 'We don't do anything in one business unit without considering how this could support the other.'"},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"Leveraging Synergies → New Markets",def:"Combining competences from multiple SBUs to create NEW markets. Example: Philips combined its medical and consumer-electronics competencies to create the 'mobile defibrillators' market."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"BCG Matrix — Advantages",def:"(1) Visualizes the various requirements of a portfolio. (2) Shows financing flows between SBUs. (3) Disciplines managers to think portfolio. (4) Helps spot when 'Stars can sink' into Dogs."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"BCG Matrix — Disadvantages",def:"(1) Vague definitions of growth/share boundaries. (2) Strong assumptions about capital markets. (3) Treats SBUs as independent — ignores commercial linkages. (4) Ignores dynamic environment. (5) 'Unkind to animals' (the metaphor doesn't capture nuance)."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",term:"Portfolio Restructuring Options",def:"To reshape the corporate portfolio: organic growth, acquisitions, joint ventures/alliances, divestments/spin-offs, mergers, harvesting (Dogs), turnaround (Question Marks)."},
+{m:3,cat:"Strategy & Society",src:"Lecture",term:"Net-Positive — Partner with Critics",def:"Net-positive companies actively partner with their competitors, critics, civil society, and governments to tackle systemic problems too big for any single firm to solve alone (e.g. climate, inequality)."},
+
+// MODULE 4 — additions
+{m:4,cat:"Innovation Sources",src:"Lecture",term:"Internal Sources — Research Side",def:"To generate ideas internally: (1) increase R&D budget, (2) enhance employee creativity via supportive environment, (3) establish an internal idea-collection system, (4) launch internal innovation competitions, (5) implement creativity training."},
+{m:4,cat:"Innovation Sources",src:"Lecture",term:"Internal Sources — Development Side",def:"To ensure good ideas survive: use qualitative and quantitative evaluation tools, stage-gate processes, business case validation, prototyping, and pilot testing. Avoid 'best idea' bias."},
+{m:4,cat:"Innovation Sources",src:"Lecture",term:"Why Closed Innovation Fails in VUCA",def:"(1) Too SLOW (time and resource intensive). (2) Risk concentration — bets all on a single organization's foresight. (3) Too COMPLEX — innovation is too multifaceted for any single organization to master alone."},
+{m:4,cat:"Open Innovation",src:"Lecture",term:"5 External Sources of Innovation",def:"(1) Crowdsourcing (consumers, public). (2) Universities and research institutions. (3) Startups. (4) Suppliers. (5) Competitors (coopetition). The most valuable innovation arises from the INTERLINKAGES between these sources."},
+{m:4,cat:"Open Innovation",src:"Lecture",term:"Open Innovation — Closed vs. Open",def:"CLOSED: ideas generated and developed entirely inside the firm; tight control. OPEN: ideas and knowledge flow IN and OUT of the firm; collaborative, networked, faster, more diverse. Chesbrough's framework."},
+{m:4,cat:"Open Innovation",src:"Lecture",term:"PoC Graveyard",def:"Trap for incumbents: ~90% of corporate–startup pilot projects (Proofs of Concept) end up unfunded and abandoned, where startups earn nothing. Mismanaged open innovation can backfire for both sides."},
+{m:4,cat:"Disruption",src:"HBR",term:"Innovator's Dilemma — Core Quote",def:"'Disruption describes a process whereby a smaller company with fewer resources is able to successfully challenge established incumbent businesses.' Christensen's central insight."},
+{m:4,cat:"Disruption",src:"HBR",term:"Disruption — Often-Overlooked Principles",def:"(1) Disruption is a PROCESS, not an event — takes time. (2) Disruptors initially build viable business models with DIFFERENT economics. (3) Disruption is NOT the same as a 'breakthrough' that improves on existing dimensions."},
+{m:4,cat:"Disruption",src:"HBR",term:"Examples of Disruptive Innovation",def:"Smartphone cameras vs. dedicated cameras; Wikipedia vs. printed encyclopedias; Google Maps vs. GPS units; Netflix vs. video rental; Kindle vs. printed books; Airbnb vs. hotels; Uber vs. taxis."},
+{m:4,cat:"Disruption",src:"HBR",term:"Strategic Advice on Disruption",def:"LARGE COMPANIES: recognize disruptive innovation potential despite initial limitations; don't let current customers veto bets on the future. STARTUPS: leverage agility to serve niche markets; refine technology to enable upmarket attacks."},
+{m:4,cat:"Disruption",src:"Lecture",term:"4 Options to Integrate Disruptive Innovation",def:"Christensen & Overdorf 2×2 of values fit × resources fit: (1) Existing unit + existing staff, (2) Existing unit + NEW staff, (3) NEW unit + existing staff, (4) NEW unit + NEW staff (full spin-off). Choice depends on fit with current organization."},
+{m:4,cat:"Innovation Concepts",src:"Lecture",term:"S-Curve — Key Decision Points",def:"(1) TIMING OF TIPPING POINT — when to ramp up production and distribution. (2) TIMING OF PLATEAU — when to reduce investment and costs. (3) TIMING OF TRIPPING POINT — predict collapse of demand. (4) EXTENT — estimate the final ceiling."},
+{m:4,cat:"Innovation Concepts",src:"Lecture",term:"First Mover vs. Fast Follower",def:"FIRST MOVER: establishes market, builds brand, faces high uncertainty, may benefit from 5 FMA elements. FAST FOLLOWER: learns from first mover's mistakes, enters when market is proven, lower risk. Both can win — context dependent."},
+{m:4,cat:"Business Models",src:"HBR",term:"Magic Triangle — 4 Dimensions",def:"(1) WHO — target customer segments. (2) WHAT — value proposition / offering. (3) HOW — value chain / activities & resources. (4) WHY — profit/revenue mechanism. All four must be internally consistent."},
+{m:4,cat:"Business Models",src:"Lecture",term:"Why BM Innovation Is Hard",def:"(1) Overcoming the DOMINANT LOGIC. (2) Difficulty thinking in business-model terms (vs. products). (3) Lack of systematic tools. (4) Evaluating BMs in isolation (ignoring interaction with competitors' BMs). (5) Ignoring dynamic elements (virtuous cycles)."},
+{m:4,cat:"Business Models",src:"Lecture",term:"BM Innovation — Underinvestment",def:"Many big successes (Amazon, Apple, Netflix, Airbnb, Uber) are based on innovative BUSINESS MODELS, not products/processes. Yet only ~10% of multinational corporations' innovation investment goes to business-model innovation — a major gap."},
+
+// MODULE 5 — additions
+{m:5,cat:"Organizational Structure",src:"Lecture",term:"Why Structure Matters",def:"Structures give people formally defined roles, responsibilities, and lines of reporting. They are the 'skeleton' of the organization — the basic framework on which strategy execution is built."},
+{m:5,cat:"Organizational Structure",src:"Lecture",term:"Multinational Structure — 2 Dimensions",def:"(1) DEGREE OF GLOBAL COORDINATION required (synergies, scale). (2) DEGREE OF LOCAL RESPONSIVENESS required (adapting to local markets). Combinations yield Global, Multi-domestic, International, and Transnational forms."},
+{m:5,cat:"Organizational Structure",src:"Lecture",term:"Functional Structure — Pros & Cons",def:"PROS: CEO in touch with operations; clear responsibilities; concentration of expertise; specialist senior management. CONS: CEO overloaded with routine; strategic issues neglected; coordination between functions hard; difficult with diversity."},
+{m:5,cat:"Organizational Structure",src:"Lecture",term:"Multidivisional Structure — Pros & Cons",def:"PROS: flexible (add/divest divisions); performance-controlled; ownership of strategy at division level; specialization; training in strategic view. CONS: duplication of functions; silo risk; loss of central control."},
+{m:5,cat:"Organizational Structure",src:"Lecture",term:"Matrix — Pros & Cons",def:"PROS: integrates knowledge; flexible; allows dual dimensions to coexist. CONS: high conflict (two bosses); slow decisions; unclear responsibility for jobs/tasks AND for costs/profits."},
+{m:5,cat:"Organizational Structure",src:"Lecture",term:"Project-Based — Pros & Cons",def:"PROS: highly flexible; effective knowledge exchange within projects; clear accountability. CONS: hinders cross-project knowledge accumulation; often ill-coordinated organization-wide."},
+{m:5,cat:"Leadership",src:"Lecture",term:"Leadership Styles — Continuum",def:"Continuum from AUTHORITARIAN/Instructional (top-down, command) → TRANSACTIONAL (exchange, contingent reward, management by exception) → TRANSFORMATIONAL (vision, intrinsic motivation). Strategic change typically needs more transformational."},
+{m:5,cat:"Leadership",src:"Lecture",term:"Intrinsic vs. Extrinsic Motivation",def:"EXTRINSIC: behavior driven by external rewards/punishments (bonuses, fear of demotion) — transactional. INTRINSIC: behavior driven by internal rewards (meaning, mastery, purpose) — transformational. The latter is more durable for change."},
+{m:5,cat:"Evaluating Strategy",src:"Lecture",term:"Decision Trees — Issue Tree",def:"Starts from the problem definition and divides it into components (actions, criteria, questions, topics). Best for NEW or unfamiliar problems where little is known. Uses 'what' and 'how' branching (McKinsey method)."},
+{m:5,cat:"Evaluating Strategy",src:"Lecture",term:"Decision Trees — Hypothesis-Driven Tree",def:"Starts from a hypothesized solution and develops necessary/sufficient REASONS to validate or disprove it. Best for FAMILIAR problems where sound assumptions can be made. Uses 'why' branching."},
+{m:5,cat:"Strategy Development",src:"Lecture",term:"Direction of Strategy Formation",def:"Strategies form TOP-DOWN (from senior leadership, command/planning approaches) or BOTTOM-UP (emergent from operational-level initiatives) — or both. Bottom-up often surfaces strategic opportunities that top-down planning misses."},
+{m:5,cat:"Strategy Development",src:"Lecture",term:"Successful Strategic Initiatives — 3 Requirements",def:"Burgelman: (1) Availability of autonomous entrepreneurial activity at the OPERATIONAL level. (2) Ability of MIDDLE managers to conceptualize strategic implications. (3) Capacity of TOP management to allow viable initiatives to change corporate strategy."},
+{m:5,cat:"Strategy Development",src:"Lecture",term:"Strategic Planning — Basic Model",def:"Classical sequence: external analysis (PESTEL, 5 Forces) + internal analysis (VRIO, value chain) → strategic options → evaluation (SAFe) → implementation → control/feedback. Yearly cycle in most large firms."},
+{m:5,cat:"Strategy Development",src:"Lecture",term:"Strategic Planning — Disadvantages",def:"Relies on uncertain forecasts; over-simplifies a complex world; overly bureaucratic ('process becomes the goal'); separates thinking from doing; favors analysis over synthesis; difficult to link to operations; periodic (yearly) vs. continuous change; slow."},
+{m:5,cat:"Strategy Development",src:"Lecture",term:"Open Strategy — Two Dimensions",def:"(1) TRANSPARENCY: extent to which information about the organization and its strategy is made visible. (2) INCLUSION: extent to which internal AND external stakeholders are consulted in strategy development."},
+{m:5,cat:"Strategic Change",src:"Lecture",term:"Change Kaleidoscope — 8 Contextual Factors",def:"Factors shaping change approach: (1) TIME available, (2) SCOPE of change needed, (3) PRESERVATION (what to keep), (4) DIVERSITY of staff/groups, (5) CAPABILITY to change, (6) CAPACITY (resources), (7) READINESS of staff, (8) POWER held by change leader."},
+{m:5,cat:"Strategic Change",src:"Lecture",term:"Timing of Change — Phases",def:"Change typically unfolds in phases: UNFREEZE (create awareness/urgency) → MOVE (implement change actions) → REFREEZE (consolidate new ways of working). Lewin's classic model — widely used to time interventions."},
+{m:5,cat:"Strategic Change",src:"Lecture",term:"Types of Strategic Change",def:"Spectrum: ADAPTATION (incremental, within existing paradigm) → RECONSTRUCTION (rapid but no paradigm shift) → EVOLUTION (incremental + paradigm shift) → REVOLUTION (rapid + paradigm shift). Choice depends on the Change Kaleidoscope factors."},
+{m:5,cat:"Strategic Change",src:"Lecture",term:"Why Transformations Fail",def:"Majority of transformations fail. Common factors: lack of clear vision; insufficient sense of urgency; lack of leadership commitment; cultural resistance; under-communication; lack of short-term wins; declaring victory too early; failing to anchor changes in culture (Kotter)."},
+{m:5,cat:"Strategic Change",src:"Lecture",term:"Diffusion of Change Process",def:"TRADITIONAL view: top-down — leadership defines change, cascades down through layers. OPEN STRATEGY view: change diffuses through participation and stakeholder involvement — slower at start but stronger adoption."},
+{m:5,cat:"Strategic Change",src:"HBR",term:"Furr 2022 — 4 Pillars Detail",def:"(1) IT UPLIFT — modernize IT foundations (capabilities: data analytics, IT architects, DevOps). (2) DIGITIZING OPERATIONS — streamline core processes. (3) DIGITAL MARKETING — data-driven customer engagement. (4) NEW DIGITAL BUSINESSES — entirely new BMs enabled by digital."},
+{m:5,cat:"Strategic Change",src:"Lecture",term:"Digital Strategy — Formulation vs. Implementation",def:"Most firms ENVISION fundamental digital transformations (formulation is widespread) but only a minority successfully IMPLEMENT them. The execution gap — not the strategic insight — is where most firms fail."},
+
+// GUEST LECTURES — additions
+{m:3,cat:"Guest Lecture — MOOST",src:"Guest",term:"MOOST — Energy Industry Problem",def:"Two massive gaps in European energy: 60 GW missing peak demand capacity + 340 TWh missing flexible electricity consumption (~equivalent of 100 nuclear plants). Solution requires shifting WHEN energy is used, not just supplying more."},
+{m:3,cat:"Guest Lecture — MOOST",src:"Guest",term:"MOOST — Engagement Funnel Problem",def:"Most European energy providers have apps — but 87% of customers NEVER use them, 92% stop within 3 months, 97% never take action. The business potential remains untapped because providers can't engage customers."},
+{m:3,cat:"Guest Lecture — MOOST",src:"Guest",term:"MOOST — Solution: Understand-Engage-Develop-Automate",def:"4-stage funnel: UNDERSTAND each home individually via profiling → ENGAGE with hyper-targeted insights → DEVELOP via next-best-action proposals → AUTOMATE load shifts in line with preferences and forecasts."},
+{m:3,cat:"Guest Lecture — MOOST",src:"Guest",term:"MOOST — Penetration Through Multipliers",def:"Go-to-market via partners with market access. Whitelabel solution providers act as multipliers: one integration → many end-companies served. Faster scale than direct-to-consumer for a B2B2C SaaS."},
+{m:4,cat:"Guest Lecture — ABB",src:"Guest",term:"ABB — Corporate vs. Business Strategy",def:"CORPORATE strategy: manage the portfolio, allocate cash & people, provide 'corporate glue' (culture/values, governance, brand). BUSINESS strategy: customer-first — pick industries/countries, target customers, define go-to-market, portfolio, investments."},
+{m:4,cat:"Guest Lecture — ABB",src:"Guest",term:"ABB — ARR Business Model Innovation",def:"ABB shifted from ad-hoc, reactive service to PLANNED preventive/predictive service via OneCare subscription agreements. Generates Annual Recurring Revenue (ARR). Works only when customer gets MORE value than calling ad-hoc support."},
+{m:4,cat:"Guest Lecture — ABB",src:"Guest",term:"ABB — 3 Dimensions of Value",def:"For SHAREHOLDERS: share price, total shareholder return, sustainability leadership. For CUSTOMERS: solve problems, run leaner and cleaner. For TEAM: great place to work on world's most pressing problems. Strategy must serve all three."},
+];
+
+ALL.forEach((c,i)=>c.id=i);
+let nextId = ALL.length;
+
+// ═════════════════════════════════════════════════════════════
+// QUIZ / EXAM QUESTION BANK (MCQ)
+// ═════════════════════════════════════════════════════════════
+let QUIZ = [
+// MODULE 1
+{m:1,cat:"Fundamentals",src:"HBR",q:"According to the HBR article by Topping (2019) on zero-carbon emissions, by what year should firms reach net-zero to align with the 'science-based target initiative'?",opts:["2030","2040","2050","2060"],correct:2,exp:"Topping (2019) sets 2050 as the science-based target year for full net-zero alignment."},
+{m:1,cat:"Measuring Success",src:"Lecture",q:"What are the four elements of performance discussed in the lectures?",opts:["Market, Financial, Social, Environmental","Market, Financial, Productivity, Efficiency","Market, Efficiency, Social, Environmental","Market, Productivity, Financial, Environmental"],correct:0,exp:"The 4 elements are Market, Financial, Social, and Environmental — going beyond pure profit."},
+{m:1,cat:"ESG",src:"Lecture",q:"In ESG Risk Reporting, into which 'bucket' do corporate policies addressing corruption fall?",opts:["Environmental (E)","Social (S)","Governance (G)","None of the above"],correct:2,exp:"Anti-corruption sits under GOVERNANCE — alongside board structure and executive ethics."},
+{m:1,cat:"Measuring Success",src:"Lecture",q:"What is meant by 'greenium'?",opts:["Firms with less carbon emissions are more profitable","Firms pay less interest for green bonds linked to ESG performance compared to normal bonds","Firms contributing to SDGs are less likely to lose their license to operate","Shareholders favor CEOs with sustainability expertise"],correct:1,exp:"'Greenium' = the lower yield (premium price) investors accept for ESG-linked green bonds."},
+{m:1,cat:"Articulating Strategy",src:"Lecture",q:"Which of the following does NOT suitably describe a vision statement?",opts:["Should provide guidance and inspiration","Describes what you do, who you do it for, and the benefit it provides","Concerned with the future the organization seeks to create","Pertains to where the organization hopes to be going"],correct:1,exp:"Describing 'what you do, who for, and the benefit' is a MISSION statement — not a vision."},
+{m:1,cat:"Articulating Strategy",src:"Lecture",q:"Which statement describes a corporate vision?",opts:["Concerned with the future the organization seeks to create","Aims to provide clarity about what the organization is fundamentally there to do","Communicates the enduring core 'principles'","Statements of visionary and specific outcomes to be achieved"],correct:0,exp:"(b) = mission, (c) = values, (d) = objectives/goals. Vision = the future you seek to create."},
+{m:1,cat:"Fundamentals",src:"Lecture",q:"Which of the following are the TWO basic logics for translating strategy into above-average performance?",opts:["Market-based view & Resource-based view","Outside-in & Inside-out","Disparate view & Embedded view","Focus on superior customer understanding & Focus on superior resources"],correct:2,exp:"'Disparate view & Embedded view' is NOT a recognized pair — all the others are equivalent ways to describe the two logics."},
+
+// MODULE 2
+{m:2,cat:"Porter's 5 Forces",src:"HBR",q:"According to Porter's Five Forces, what are the two factors that determine the profitability of a firm?",opts:["Degree of novelty of an industry & Overall attractiveness","Number of competitors & Position of the firm within the industry","Degree of novelty & Number of competitors","Overall attractiveness of the industry & Position of the firm within that industry"],correct:3,exp:"(1) Industry attractiveness (the 5 Forces) + (2) the firm's position within that industry (cost vs. differentiation)."},
+{m:2,cat:"SWOT",src:"Lecture",q:"Which of the following most accurately describes the principles of a SWOT analysis?",opts:["Opportunities and threats are related to resource-based models","Strengths and weaknesses are related to environmental models","An internal analysis can reveal opportunities and threats","An external analysis can reveal opportunities and threats"],correct:3,exp:"External analysis (PESTEL, 5 Forces) reveals Opportunities/Threats. Internal analysis (VRIO, Value Chain) reveals Strengths/Weaknesses."},
+{m:2,cat:"Industry Life Cycle",src:"Lecture",q:"What are the phases of the industry life cycle?",opts:["Growth, rivalry, cooperation, decline","Growth, stagnation, decline","Development, competition, stabilization","Development, growth, shake-out, maturity, decline"],correct:3,exp:"5 phases: Development → Growth → Shake-out → Maturity → Decline."},
+{m:2,cat:"VRIO",src:"HBR",q:"Which is NOT one of the four VRIO criteria for a resource to give sustainable competitive advantage?",opts:["Valuable","Rare","Inimitable","Innovative"],correct:3,exp:"VRIO = Valuable, Rare, Inimitable, Organization (supports exploitation). 'Innovative' is not part of VRIO."},
+{m:2,cat:"Dynamic Capabilities",src:"Lecture",q:"Which is NOT one of the microfoundations of the 'Reconfiguring' component of dynamic capabilities?",opts:["Knowledge Management","Co-specialization","Decision-making protocols","Change Management"],correct:3,exp:"Reconfiguring microfoundations: Knowledge Mgmt, Co-specialization, Governance, Decision-making protocols. 'Change Management' is NOT one — it's a common trap."},
+{m:2,cat:"Dynamic Capabilities",src:"Lecture",q:"Which of the following is a microfoundation of SENSING (component 1 of dynamic capabilities)?",opts:["Delineating the business model","Identifying target markets and changing customer needs","Managing complements and controlling platforms","Leadership, loyalty, commitment"],correct:1,exp:"Sensing is about identifying opportunities/threats — including target markets and changing customer needs. (a) and (d) belong to Seizing."},
+{m:2,cat:"Value Chain",src:"Lecture",q:"Which tool fits this definition: 'describes the categories of activities within and around an organization that together create products or services'?",opts:["Value system","Activity System","Value Chain","Ecosystem"],correct:2,exp:"This is Porter's Value Chain — primary + support activities within and around a single organization."},
+{m:2,cat:"Ecosystems",src:"HBR",q:"According to Jacobides (2019), which is NOT a generically recommended ecosystem strategy?",opts:["Focus on creating value for other players","Make sure to become the central orchestrator","Decide early what kind of access structure (open/managed/closed)","Be open to adapt your organization as you go along"],correct:1,exp:"You DON'T always need to be the central orchestrator — sometimes being a strong complementor is better. The other three are all genuine recommendations."},
+{m:2,cat:"Ecosystems",src:"HBR",q:"In Jacobides (2019), with what kind of ecosystem did Alibaba start?",opts:["A sales and marketing platform","A C2C marketplace","A wholesale marketplace","A third-party-seller B2C ecosystem"],correct:2,exp:"Alibaba started as a B2B wholesale marketplace before expanding into Taobao (C2C) and Tmall (B2C)."},
+
+// MODULE 3
+{m:3,cat:"Hybrid Strategy",src:"Lecture",q:"What type of hybrid strategy does Migros use with its subsidiaries Migros and Denner?",opts:["Sequential hybrid strategy","Multi-local hybrid strategy","Simultaneous hybrid strategy","Pure cost leadership strategy"],correct:1,exp:"Multi-local: different brands for different segments (Migros = mid-market, Denner = discount)."},
+{m:3,cat:"Cost Leadership",src:"Lecture",q:"Which of the following best describes 'economies of scale' as a source of cost leadership?",opts:["Shifting labor-intensive operations to low-cost countries","Designing for efficiency","Gaining cumulative experience and reducing costs over time","Increasing scale reduces the average costs of operation"],correct:3,exp:"Economies of scale = average cost decreases as output increases. (a)=low input costs, (b)=design, (c)=experience curve."},
+{m:3,cat:"SBU",src:"Lecture",q:"Which statement about SBUs is correct?",opts:["SBUs formulate strategies but are not directly responsible for P&L","SBUs formulate strategies but adhere to corporate-level decisions about WHICH markets to compete in","SBUs have high autonomy but cannot employ resources without corporate consent","SBUs have high autonomy but must coordinate with other SBUs because they overlap"],correct:1,exp:"SBUs decide HOW to compete in their market; corporate decides WHICH markets the SBU plays in."},
+{m:3,cat:"Corporate Strategy",src:"Lecture",q:"Which company best serves as an example of a 'parental developer'?",opts:["Berkshire Hathaway","General Electric","Volkswagen","Walt Disney"],correct:0,exp:"Berkshire Hathaway is the classic parental developer — the parent adds value to acquired SBUs through its own capabilities. (VW=operational synergy, Disney=market power, GE=mixed.)"},
+{m:3,cat:"Corporate Strategy",src:"Lecture",q:"Which of the following does NOT result in a corporate discount?",opts:["Intervention","Increasing bureaucratic complexity","Causing additional management costs","They all lead to a corporate discount"],correct:3,exp:"All three (intervention, complexity, management costs) reduce value — so the answer is 'they all lead to a corporate discount.'"},
+{m:3,cat:"Platforms",src:"HBR",q:"Once the platform owner has chosen market sides, created stand-alone value, and accelerated third-party complements, what is the next step?",opts:["Enhance platform governance and control mechanisms","Solve the chicken-or-egg problem","Establish profit-generating mechanisms","Enable network effects"],correct:2,exp:"Sequence: choose sides → solve chicken-or-egg (coring/subsidy) → design profit-generation → establish governance/rules."},
+{m:3,cat:"Platforms",src:"HBR",q:"According to Van Alstyne et al. (2016), which is NOT one of the new metrics platform firms should monitor?",opts:["Match quality","Click-through rate","Engagement","Interaction failure"],correct:1,exp:"Click-through rate is a pipeline-era metric. New platform metrics: match quality, engagement, interaction failure (and negative network effects)."},
+{m:3,cat:"Fitbit case",src:"Case",q:"Which is NOT one of the main sources of competitive advantage for Fitbit (from the case)?",opts:["Brand Awareness","Clear Market Position","Complementarities with other Fitbit products","Affordable prices and multiple selections"],correct:2,exp:"Fitbit's advantages were brand, position, and price/variety. Complementarities with OTHER Fitbit products were limited — Fitbit was largely a single-product firm."},
+
+// MODULE 4
+{m:4,cat:"FMA",src:"Lecture",q:"Which is NOT one of the five elements of first-mover advantage?",opts:["Experience Curve","Scale benefits","Differentiation","Pre-emption of scarce resources"],correct:2,exp:"The 5 FMA elements: Experience curve, Scale benefits, Pre-emption of scarce resources, Reputation, Switching costs. 'Differentiation' is NOT among them."},
+{m:4,cat:"Open Innovation",src:"Lecture",q:"To which category of open innovation processes does CROWDSOURCING belong?",opts:["Inside-Out Process","Outside-In Process","Coupled Process","Corporate Venturing Process"],correct:1,exp:"Crowdsourcing pulls knowledge INTO the firm from outside → Outside-In process."},
+{m:4,cat:"Open Innovation",src:"HBR",q:"According to Dahlander & Wallin (2015), which is NOT a typical motivation of individual open-source developers?",opts:["Labor market signaling","Ethical concerns","Opposing software that cannot be inspected","Accessing complementary skills and assets"],correct:3,exp:"'Accessing complementary skills and assets' is a FIRM-level motivation for open innovation — not a typical individual developer motivation."},
+{m:4,cat:"Disruption",src:"HBR",q:"A disruptive innovation has HIGH fit with an incumbent's VALUES but LOW fit with its resources/capabilities. How should it be integrated (Christensen & Overdorf 2000)?",opts:["Create a new, separate unit; hire new experienced employees","Integrate into existing organizational unit; hire new experienced employees","Integrate into existing organizational unit; staff with existing employees","Create a new, separate unit; staff with existing employees"],correct:1,exp:"Values fit → integrate into existing unit (it aligns with culture). Low resources fit → bring in new experienced staff."},
+{m:4,cat:"Product/Process",src:"Lecture",q:"When are traditional industries typically dominated by product innovation?",opts:["In the first stages of a new industry, before the dominant design has been established","After the dominant design has been established","After process innovation has been almost fully exploited","Traditional industries are always dominated by product innovation"],correct:0,exp:"Product innovation dominates BEFORE the dominant design emerges. After it, process innovation takes over for efficiency."},
+{m:4,cat:"Tech Push",src:"Lecture",q:"Which statement about 'technology push vs. market pull' is NOT correct?",opts:["In tech push, the technology is available and designers create a product to use it","Tech push always involves creating NEW technology while market pull only refines existing technologies","In market pull, ideas from market research translate into new products","Both can involve new technology AND refinement"],correct:1,exp:"Both push and pull can involve new tech or refinement — they're not exclusive on that dimension."},
+{m:4,cat:"Pisano Matrix",src:"HBR",q:"In Pisano's matrix (capability goal × capability type), what are the two strategies that DEEPEN capabilities?",opts:["Domain Expanding & Application Expanding","Application Expanding & Domain Fortifying","Domain Fortifying & Application Fortifying","Domain Expanding & Domain Fortifying"],correct:2,exp:"'Fortifying' = deepening. So deepening strategies are Domain Fortifying + Application Fortifying. Expanding = broadening."},
+{m:4,cat:"Airbnb",src:"Case",q:"Which innovative aspect of Airbnb's business model was the basis of its success in the hotel industry?",opts:["Providing support for the whole vacation trip","Focusing on making rooms feel like the guests' home","Offering rooms WITHOUT owning a single hotel","Offering rooms fully digitally through a sophisticated website"],correct:2,exp:"Airbnb's BM innovation was the asset-light model: matching guests with hosts WITHOUT owning property."},
+
+// MODULE 5
+{m:5,cat:"Matrix Structure",src:"Lecture",q:"Which is NOT an advantage of the Matrix structure?",opts:["Knowledge is integrated","Flexible","Dual dimensions possible","Clear responsibilities"],correct:3,exp:"Matrix structures CONFUSE responsibilities (two bosses, dual reporting). The first three are real advantages."},
+{m:5,cat:"Project-based Structure",src:"Lecture",q:"Which structure has high flexibility and effective knowledge exchange WITHIN projects, but hinders knowledge accumulation across the firm?",opts:["Matrix structure","Functional structure","Project-based structure","Multidivisional structure"],correct:2,exp:"Project-based: great in-project flexibility and exchange, but knowledge dissolves when the project ends."},
+{m:5,cat:"Transformational",src:"Lecture",q:"Which is NOT an accurate description of transformational leadership?",opts:["Transformational leaders trigger followers' intrinsic motivation","Followers typically identify with the leader","A transformational leader provides intellectual stimulation","A transformational leader conducts management by exception"],correct:3,exp:"Management by exception is TRANSACTIONAL leadership (intervene only when standards aren't met). Transformational works through vision and intrinsic motivation."},
+{m:5,cat:"Transformational",src:"Lecture",q:"Which is NOT one of the LEADER activities that increase intellectual stimulation?",opts:["Stimulating rethinking of old ways","Providing intellectual challenges","Being an intrapreneur","Stimulating creativity"],correct:2,exp:"'Being an intrapreneur' is a FOLLOWER outcome — the leader stimulates the followers to become intrapreneurs."},
+{m:5,cat:"Strategy Emergence",src:"Lecture",q:"Which statement about how strategies emerge is FALSE?",opts:["The intended strategy view says strategies come from top management's considered intentions","Emergent strategies don't develop from a grand plan but emerge over time","Intended and emergent strategies are mutually exclusive","Realized strategies often diverge from intended strategies"],correct:2,exp:"Intended and emergent strategies COEXIST in most firms — they are NOT mutually exclusive. Realized strategy is a blend of both."},
+{m:5,cat:"Strategy Emergence",src:"Lecture",q:"Which constitutes ways in which strategies can EMERGE?",opts:["Through external and internal analysis","Through experimentation, bargaining, and organizational systems","Through action planning and strategic control","Through transactional, situational, and transformational leadership"],correct:1,exp:"Emergent strategies arise from experimentation, bargaining between actors, and organizational routines/systems."},
+{m:5,cat:"Open Strategy",src:"HBR",q:"According to Stadler et al. (2021), which is a suitable tool for strategy EXECUTION?",opts:["Business logic contest","Competitions","Trend radar","Jams"],correct:3,exp:"Jams (large collaborative online events) are for EXECUTION. Competitions and Trend Radar are for GENERATING strategic ideas."},
+{m:5,cat:"Open Strategy",src:"HBR",q:"Stadler et al. (2021) propose tools for generating strategic IDEAS via open innovation. Which?",opts:["Crowdfunding & Social networks","Employee social network & Jams","Competitions & Trend radar","Business logic contest"],correct:2,exp:"For generating strategic ideas: Competitions + Trend Radar. Jams are for execution."},
+{m:5,cat:"Open Strategy",src:"HBR",q:"Which is a CENTRAL DILEMMA of 'Open Strategy'?",opts:["Dilemma of disruption: current customers vs. niche segments","Dilemma of governance: formal contracts and power vs. informal power and trust","Dilemma of innovation: cost leadership vs. differentiation","Dilemma of process: wider access to knowledge vs. speed/flexibility/control"],correct:3,exp:"The 'process' dilemma is the classic Open Strategy tension: wider input vs. speed and control."},
+{m:5,cat:"Digital Transformation",src:"HBR",q:"According to Furr et al. (2022) on the four pillars of digital transformation, which is NOT a crucial capability for IT uplift?",opts:["Data analytics","IT architects","DevOps teams","Change management"],correct:3,exp:"IT-uplift capabilities = data analytics, IT architects, DevOps. Change management is important but NOT classified as an IT-uplift capability per Furr."},
+];
+
+QUIZ.forEach((q,i)=>q.id='q'+i);
+
+// ═════════════════════════════════════════════════════════════
+// STATE
+// ═════════════════════════════════════════════════════════════
+let mode = 'flash';
+let activeMod = 'all';
+let deck = [], idx = 0, flipped = false, shuffled = false, filterWeak = false;
+let known = new Set(), learning = new Set();
+let editingId = null;
+let searchActive = false, searchTerm = '';
+
+// Quiz state
+let qDeck = [], qIdx = 0, qAnswers = {}, qCorrect = 0, qWrong = 0, qShuffled = false;
+
+// Exam state
+let exDeck = [], exIdx = 0, exAnswers = {}, exTimer = null, exTimeLeft = 0, exStartTime = 0;
+const EXAM_DURATION = 90 * 60; // seconds
+const EXAM_QUESTIONS = 45;
+
+// Test (typed-answer) state
+let testMods = new Set();              // selected modules
+let testFilters = new Set(['new','w','p','c']); // judgment-state filters
+let testSmart = false;                 // adaptive prioritization
+let testDeck = [], testIdx = 0;
+let testCorrect = 0, testPartial = 0, testWrong = 0, testSkipped = 0;
+let testSubmitted = false;             // current card has been submitted
+let testJudged = false;                // current card has been judged
+let testLastJudgment = null;           // 'c'|'p'|'w' for current card (for re-tally)
+let testCurrentVerdict = null;         // 'good' | 'partial' | 'bad'
+
+// Per-card mastery stats (persisted)
+// stats[id] = { c, p, w, last:'c'|'p'|'w'|null, t: ms }
+let stats = {};
+
+// ═════════════════════════════════════════════════════════════
+// LOCAL STORAGE
+// ═════════════════════════════════════════════════════════════
+function save(){
+  try{
+    localStorage.setItem('sm-known', JSON.stringify([...known]));
+    localStorage.setItem('sm-learning', JSON.stringify([...learning]));
+    localStorage.setItem('sm-stats', JSON.stringify(stats));
+    localStorage.setItem('sm-custom', JSON.stringify(ALL.filter(c=>c.id>=70)));
+  }catch(e){}
+}
+function load(){
+  try{
+    const k = JSON.parse(localStorage.getItem('sm-known')||'[]');
+    const l = JSON.parse(localStorage.getItem('sm-learning')||'[]');
+    known = new Set(k); learning = new Set(l);
+    stats = JSON.parse(localStorage.getItem('sm-stats')||'{}');
+  }catch(e){ stats = {}; }
+}
+
+// ═════════════════════════════════════════════════════════════
+// HELPERS
+// ═════════════════════════════════════════════════════════════
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function modFilter(arr, modKey){
+  return modKey==='all' ? arr : arr.filter(c=>c.m==modKey);
+}
+
+function getPool(){
+  let base = modFilter(ALL, activeMod);
+  if(searchActive && searchTerm){
+    const t = searchTerm.toLowerCase();
+    base = base.filter(c=> c.term.toLowerCase().includes(t) || c.def.toLowerCase().includes(t));
+  }
+  if(filterWeak) base = base.filter(c=>learning.has(c.id));
+  return base;
+}
+
+function buildDeck(){
+  let pool = getPool();
+  if(!searchActive && !filterWeak){ pool = pool.filter(c=>!known.has(c.id)); if(pool.length===0) pool = getPool(); }
+  deck = shuffled ? shuffle([...pool]) : [...pool];
+}
+
+// ═════════════════════════════════════════════════════════════
+// FLASHCARD RENDER
+// ═════════════════════════════════════════════════════════════
+function render(){
+  const card = deck[idx];
+  if(!card){ showComplete(); return; }
+
+  document.getElementById('study-area').style.display='';
+  document.getElementById('complete').classList.remove('show');
+
+  document.getElementById('cat-badge').textContent = `M${card.m} · ${card.cat}`;
+  const srcBadge = document.getElementById('src-badge');
+  if(card.src){ srcBadge.textContent = card.src; srcBadge.style.display=''; } else srcBadge.style.display='none';
+  document.getElementById('term-txt').textContent = card.term;
+  document.getElementById('def-txt').textContent  = card.def;
+
+  const pos = `${idx+1} / ${deck.length}`;
+  document.getElementById('nav-count').textContent = pos;
+  document.getElementById('prog-txt').textContent  = `Card ${idx+1} of ${deck.length}`;
+
+  const total = modFilter(ALL, activeMod).length;
+  const reviewed = known.size + learning.size;
+  const pct = total ? Math.round((reviewed/total)*100) : 0;
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+
+  document.getElementById('s-know').textContent  = known.size;
+  document.getElementById('s-learn').textContent = learning.size;
+  document.getElementById('s-left').textContent  = Math.max(0, total - known.size - learning.size);
+
+  document.getElementById('btn-prev').disabled = idx===0;
+  document.getElementById('btn-next').disabled = idx===deck.length-1;
+
+  setFlip(false);
+  resetPractice();
+}
+
+function setFlip(state){
+  flipped = state;
+  document.getElementById('card3d').classList.toggle('flipped', state);
+  document.getElementById('action-row').classList.toggle('show', state);
+}
+function flipCard(){ setFlip(!flipped); }
+function next(){ if(idx<deck.length-1){idx++;render();} }
+function prev(){ if(idx>0){idx--;render();} }
+
+// ─── PRACTICE AREA ───
+let practiceVisible = true;
+function togglePractice(){
+  practiceVisible = !practiceVisible;
+  document.getElementById('practice-body').style.display = practiceVisible ? '' : 'none';
+  document.getElementById('practice-toggle').textContent = practiceVisible ? 'hide' : 'show';
+}
+function resetPractice(){
+  const inp = document.getElementById('practice-input');
+  inp.value = '';
+  inp.disabled = false;
+  document.getElementById('practice-reveal').classList.remove('show');
+  document.getElementById('btn-check').disabled = false;
+}
+function checkPractice(){
+  const card = deck[idx]; if(!card) return;
+  document.getElementById('practice-input').disabled = true;
+  document.getElementById('btn-check').disabled = true;
+  document.getElementById('practice-answer-text').textContent = card.def;
+  document.getElementById('practice-reveal').classList.add('show');
+  setFlip(true);
+}
+
+function mark(isKnown){
+  const card = deck[idx]; if(!card) return;
+  if(isKnown){ known.add(card.id); learning.delete(card.id); }
+  else        { learning.add(card.id); known.delete(card.id); }
+  save();
+  if(idx<deck.length-1){ idx++; render(); } else showComplete();
+}
+
+function showComplete(){
+  document.getElementById('study-area').style.display='none';
+  document.getElementById('complete').classList.add('show');
+  document.getElementById('c-know').textContent = known.size;
+  document.getElementById('c-learn').textContent = learning.size;
+}
+
+function practiceWeak(){
+  filterWeak = true;
+  document.getElementById('btn-filt').classList.add('on');
+  idx=0; buildDeck();
+  document.getElementById('complete').classList.remove('show');
+  document.getElementById('study-area').style.display='';
+  render();
+}
+
+function resetAll(){
+  known.clear(); learning.clear(); save();
+  filterWeak = false; searchActive = false; searchTerm='';
+  document.getElementById('btn-filt').classList.remove('on');
+  document.getElementById('btn-search').classList.remove('on');
+  document.getElementById('search-bar').classList.remove('show');
+  document.getElementById('search-inp').value='';
+  idx=0; buildDeck(); render();
+}
+
+// ═════════════════════════════════════════════════════════════
+// MODULE TABS
+// ═════════════════════════════════════════════════════════════
+document.querySelectorAll('.mod-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.mod-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeMod = btn.dataset.mod;
+    syncFlashBanner();
+    idx=0; qIdx=0;
+    if(mode==='flash'){ buildDeck(); render(); }
+    else if(mode==='quiz'){ buildQuizDeck(); quizRender(); }
+  });
+});
+
+// ─── FLASHCARD MODULE BANNER ───
+function buildFlashBanner(){
+  const wrap = document.getElementById('flash-mod-pills');
+  wrap.innerHTML = '';
+  const labels = {all:'All Modules',1:'M1 Fundamentals',2:'M2 Outside/Inside',3:'M3 Business & Corporate',4:'M4 Innovation & BM',5:'M5 Organizing & Change'};
+  const keys = ['all','1','2','3','4','5'];
+  keys.forEach(k=>{
+    const count = k==='all' ? ALL.length : ALL.filter(c=>c.m==k).length;
+    const btn = document.createElement('button');
+    btn.type='button';
+    btn.className = 'mod-pill' + (activeMod==k ? ' on' : '');
+    btn.dataset.flashMod = k;
+    btn.innerHTML = `${labels[k]} <span class="pill-count">${count}</span>`;
+    btn.addEventListener('click',()=>{
+      activeMod = k;
+      document.querySelectorAll('.mod-tab').forEach(t=>{
+        t.classList.toggle('active', t.dataset.mod===k);
+      });
+      syncFlashBanner();
+      idx=0; qIdx=0;
+      if(mode==='flash'){ buildDeck(); render(); }
+      else if(mode==='quiz'){ buildQuizDeck(); quizRender(); }
+    });
+    wrap.appendChild(btn);
+  });
+}
+function syncFlashBanner(){
+  document.querySelectorAll('#flash-mod-pills .mod-pill').forEach(p=>{
+    p.classList.toggle('on', p.dataset.flashMod===String(activeMod));
+  });
+}
+
+// ═════════════════════════════════════════════════════════════
+// TOOLBAR
+// ═════════════════════════════════════════════════════════════
+function toggleShuffle(){ shuffled=!shuffled; document.getElementById('btn-shuf').classList.toggle('on',shuffled); buildDeck(); idx=0; render(); }
+function toggleFilter(){ filterWeak=!filterWeak; document.getElementById('btn-filt').classList.toggle('on',filterWeak); buildDeck(); idx=0; render(); }
+function toggleSearch(){
+  searchActive=!searchActive;
+  document.getElementById('btn-search').classList.toggle('on',searchActive);
+  document.getElementById('search-bar').classList.toggle('show',searchActive);
+  if(!searchActive){ searchTerm=''; document.getElementById('search-inp').value=''; }
+  buildDeck(); idx=0; render();
+  if(searchActive) document.getElementById('search-inp').focus();
+}
+document.getElementById('search-inp').addEventListener('input', e=>{
+  searchTerm = e.target.value.trim();
+  buildDeck(); idx=0; render();
+});
+
+// ═════════════════════════════════════════════════════════════
+// ADD / EDIT / DELETE
+// ═════════════════════════════════════════════════════════════
+function openAdd(){
+  editingId=null;
+  document.getElementById('modal-title').textContent='Add Flashcard';
+  ['inp-term','inp-def','inp-cat'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('inp-mod').value='1';
+  document.getElementById('inp-src').value='';
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('inp-term').focus();
+}
+function openEdit(){
+  const c = deck[idx]; if(!c) return;
+  editingId = c.id;
+  document.getElementById('modal-title').textContent='Edit Flashcard';
+  document.getElementById('inp-term').value=c.term;
+  document.getElementById('inp-def').value=c.def;
+  document.getElementById('inp-mod').value=c.m;
+  document.getElementById('inp-src').value=c.src||'';
+  document.getElementById('inp-cat').value=c.cat||'';
+  document.getElementById('overlay').classList.add('show');
+}
+function saveCard(){
+  const term=document.getElementById('inp-term').value.trim();
+  const def =document.getElementById('inp-def').value.trim();
+  const mod =parseInt(document.getElementById('inp-mod').value);
+  const src =document.getElementById('inp-src').value;
+  const cat =document.getElementById('inp-cat').value.trim()||'Custom';
+  if(!term||!def){alert('Please fill in both Term and Definition.');return;}
+  if(editingId!=null){
+    const c = ALL.find(c=>c.id===editingId);
+    if(c){ c.term=term; c.def=def; c.m=mod; c.src=src; c.cat=cat; }
+  } else {
+    ALL.push({id:nextId++,m:mod,cat,src,term,def});
+  }
+  save();
+  closeModal();
+  buildDeck();
+  if(editingId==null) idx=deck.length-1; else idx=Math.min(idx,deck.length-1);
+  render();
+}
+function deleteCard(){
+  const card = deck[idx]; if(!card) return;
+  if(!confirm(`Delete "${card.term}"?`)) return;
+  ALL = ALL.filter(c=>c.id!==card.id);
+  known.delete(card.id); learning.delete(card.id);
+  save(); buildDeck(); idx=Math.min(idx,deck.length-1); render();
+}
+function closeModal(e){
+  if(e && e.target!==document.getElementById('overlay')) return;
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ═════════════════════════════════════════════════════════════
+// MODE SWITCH
+// ═════════════════════════════════════════════════════════════
+document.querySelectorAll('.mode-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
+    document.getElementById('view-flash').classList.toggle('hide', mode!=='flash');
+    document.getElementById('view-quiz').classList.toggle('hide', mode!=='quiz');
+    document.getElementById('view-test').classList.toggle('hide', mode!=='test');
+    document.getElementById('view-exam').classList.toggle('hide', mode!=='exam');
+    document.getElementById('mod-nav').classList.toggle('hide', mode==='exam' || mode==='test');
+    document.getElementById('prog-wrap').classList.toggle('hide', mode!=='flash');
+
+    if(mode==='quiz'){ buildQuizDeck(); qIdx=0; quizRender(); }
+    if(mode==='test'){
+      // reset to setup screen each entry
+      document.getElementById('test-running').classList.add('hide');
+      document.getElementById('test-result-screen').style.display='none';
+      document.getElementById('test-setup').classList.remove('hide');
+      buildTestSetup();
+    }
+  });
+});
+
+// ═════════════════════════════════════════════════════════════
+// QUIZ MODE
+// ═════════════════════════════════════════════════════════════
+function buildQuizDeck(){
+  let pool = modFilter(QUIZ, activeMod);
+  qDeck = qShuffled ? shuffle([...pool]) : [...pool];
+  qAnswers = {};
+  qCorrect = 0; qWrong = 0;
+}
+
+function quizRender(){
+  const q = qDeck[qIdx];
+  if(!q){ document.getElementById('quiz-card').innerHTML='<div class="empty"><div class="empty-icon">🎯</div><h3>No questions yet</h3><p>No quiz questions for this module.</p></div>'; return; }
+
+  document.getElementById('q-cat').textContent = `M${q.m} · ${q.cat}`;
+  const srcB = document.getElementById('q-src');
+  if(q.src){ srcB.textContent = q.src; srcB.style.display=''; } else srcB.style.display='none';
+  document.getElementById('quiz-q').textContent = `${qIdx+1}. ${q.q}`;
+  const optsEl = document.getElementById('quiz-opts');
+  optsEl.innerHTML = '';
+  const letters = ['A','B','C','D','E'];
+  const userAns = qAnswers[q.id];
+  q.opts.forEach((opt,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+    if(userAns!==undefined){
+      btn.disabled = true;
+      if(i===q.correct) btn.classList.add('correct');
+      else if(i===userAns) btn.classList.add('wrong');
+    } else {
+      btn.onclick = ()=> answerQuiz(i);
+    }
+    optsEl.appendChild(btn);
+  });
+
+  const exp = document.getElementById('quiz-explain');
+  if(userAns!==undefined){
+    document.getElementById('quiz-explain-txt').textContent = ' '+q.exp;
+    exp.classList.add('show');
+  } else exp.classList.remove('show');
+
+  document.getElementById('qnav-count').textContent = `${qIdx+1} / ${qDeck.length}`;
+  document.getElementById('qbtn-prev').disabled = qIdx===0;
+  document.getElementById('qbtn-next').disabled = qIdx===qDeck.length-1;
+
+  document.getElementById('q-correct').textContent = qCorrect;
+  document.getElementById('q-wrong').textContent = qWrong;
+  const tot = qCorrect+qWrong;
+  document.getElementById('q-pct').textContent = tot ? Math.round(qCorrect/tot*100)+'%' : '—';
+}
+
+function answerQuiz(i){
+  const q = qDeck[qIdx];
+  if(qAnswers[q.id]!==undefined) return;
+  qAnswers[q.id] = i;
+  if(i===q.correct) qCorrect++; else qWrong++;
+  quizRender();
+}
+
+function quizNext(){ if(qIdx<qDeck.length-1){qIdx++;quizRender();} }
+function quizPrev(){ if(qIdx>0){qIdx--;quizRender();} }
+function toggleQuizShuffle(){ qShuffled=!qShuffled; document.getElementById('qbtn-shuf').classList.toggle('on',qShuffled); buildQuizDeck(); qIdx=0; quizRender(); }
+function quizReset(){ buildQuizDeck(); qIdx=0; quizRender(); }
+
+// ═════════════════════════════════════════════════════════════
+// MOCK EXAM MODE
+// ═════════════════════════════════════════════════════════════
+function startExam(){
+  document.getElementById('exam-start').classList.add('hide');
+  document.getElementById('exam-result').style.display='none';
+  document.getElementById('exam-running').classList.remove('hide');
+
+  // pull random N questions from full bank
+  const pool = [...QUIZ];
+  shuffle(pool);
+  exDeck = pool.slice(0, Math.min(EXAM_QUESTIONS, pool.length));
+  exAnswers = {}; exIdx = 0;
+  exTimeLeft = EXAM_DURATION;
+  exStartTime = Date.now();
+  examRender();
+  startTimer();
+}
+
+function startTimer(){
+  if(exTimer) clearInterval(exTimer);
+  exTimer = setInterval(()=>{
+    exTimeLeft--;
+    updateTimer();
+    if(exTimeLeft<=0){ clearInterval(exTimer); submitExam(true); }
+  }, 1000);
+  updateTimer();
+}
+
+function updateTimer(){
+  const m = Math.floor(exTimeLeft/60), s = exTimeLeft%60;
+  const txt = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const el = document.getElementById('exam-timer');
+  el.textContent = txt;
+  el.classList.toggle('warn', exTimeLeft <= 300);
+}
+
+function examRender(){
+  const q = exDeck[exIdx]; if(!q) return;
+  document.getElementById('exam-progress').textContent = `Question ${exIdx+1} of ${exDeck.length}`;
+  document.getElementById('exam-q').textContent = q.q;
+  const optsEl = document.getElementById('exam-opts');
+  optsEl.innerHTML = '';
+  const letters = ['A','B','C','D','E'];
+  const userAns = exAnswers[q.id];
+  q.opts.forEach((opt,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    if(userAns===i) btn.style.borderColor = 'var(--indigo)', btn.style.background = 'var(--indigo-lt)';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = ()=>{ exAnswers[q.id] = i; examRender(); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('enav-count').textContent = `${exIdx+1} / ${exDeck.length}`;
+  document.getElementById('ebtn-prev').disabled = exIdx===0;
+  document.getElementById('ebtn-next').disabled = exIdx===exDeck.length-1;
+}
+
+function examNext(){ if(exIdx<exDeck.length-1){exIdx++;examRender();} }
+function examPrev(){ if(exIdx>0){exIdx--;examRender();} }
+
+function submitExam(auto){
+  if(!auto && !confirm('Submit your exam now? You cannot change answers after submitting.')) return;
+  if(exTimer) clearInterval(exTimer);
+  const correct = exDeck.filter(q=>exAnswers[q.id]===q.correct).length;
+  const wrong = exDeck.filter(q=>exAnswers[q.id]!==undefined && exAnswers[q.id]!==q.correct).length;
+  const skipped = exDeck.length - correct - wrong;
+  const pct = Math.round(correct/exDeck.length*100);
+  const elapsed = Math.floor((Date.now()-exStartTime)/1000);
+  const em = Math.floor(elapsed/60), es = elapsed%60;
+
+  document.getElementById('exam-running').classList.add('hide');
+  const r = document.getElementById('exam-result');
+  r.style.display = 'flex';
+  r.innerHTML = `
+    <div class="complete-icon">${pct>=80?'🏆':pct>=60?'✅':pct>=40?'📚':'💪'}</div>
+    <h2>Exam Submitted</h2>
+    <p>${auto?"<strong>Time's up!</strong> ":""}Score: <strong>${correct}/${exDeck.length}</strong> · ${pct}% · Time: ${em}m ${es}s</p>
+    <div class="c-grid">
+      <div class="c-box g"><div class="c-n">${correct}</div><div class="c-l">Correct</div></div>
+      <div class="c-box r"><div class="c-n">${wrong}</div><div class="c-l">Wrong</div></div>
+      <div class="c-box b"><div class="c-n">${skipped}</div><div class="c-l">Skipped</div></div>
+    </div>
+    <button class="btn-primary" onclick="reviewExam()">Review Answers</button>
+    <button class="btn-ghost" onclick="resetExam()">Try Again</button>
+  `;
+}
+
+function reviewExam(){
+  document.getElementById('exam-result').style.display='none';
+  document.getElementById('exam-running').classList.remove('hide');
+  exIdx = 0;
+  // Render with answers locked
+  const old = examRender;
+  examRender = function(){
+    const q = exDeck[exIdx]; if(!q) return;
+    document.getElementById('exam-progress').textContent = `Review · Q ${exIdx+1} of ${exDeck.length}`;
+    document.getElementById('exam-q').textContent = q.q;
+    const optsEl = document.getElementById('exam-opts');
+    optsEl.innerHTML = '';
+    const letters = ['A','B','C','D','E'];
+    const userAns = exAnswers[q.id];
+    q.opts.forEach((opt,i)=>{
+      const btn = document.createElement('button');
+      btn.className = 'quiz-opt';
+      btn.disabled = true;
+      btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+      if(i===q.correct) btn.classList.add('correct');
+      else if(i===userAns) btn.classList.add('wrong');
+      optsEl.appendChild(btn);
+    });
+    // append explanation
+    const exp = document.createElement('div');
+    exp.className = 'quiz-explain show';
+    exp.innerHTML = `<strong>Why?</strong> ${q.exp}`;
+    optsEl.parentNode.appendChild(exp);
+    document.getElementById('enav-count').textContent = `${exIdx+1} / ${exDeck.length}`;
+    document.getElementById('ebtn-prev').disabled = exIdx===0;
+    document.getElementById('ebtn-next').disabled = exIdx===exDeck.length-1;
+  };
+  examRender();
+}
+
+function resetExam(){
+  document.getElementById('exam-result').style.display='none';
+  document.getElementById('exam-running').classList.add('hide');
+  document.getElementById('exam-start').classList.remove('hide');
+}
+
+// ═════════════════════════════════════════════════════════════
+// TEST MODE (typed answer + fuzzy verdict)
+// ═════════════════════════════════════════════════════════════
+const STOPWORDS = new Set(['a','an','the','and','or','but','of','to','in','on','at','for','with','by','is','are','was','were','be','been','being','as','it','its','this','that','these','those','from','up','out','if','no','not','than','then','also','can','may','will','would','should','could','do','does','did','has','have','had','i','you','we','they','he','she','my','your','our','their','about','into','over','under','more','most','some','any','one','two','three','four','five']);
+
+function normalize(s){
+  return (s||'').toLowerCase().replace(/[^\w\s'-]/g,' ').replace(/\s+/g,' ').trim();
+}
+function tokenize(s){
+  return normalize(s).split(' ').filter(w=>w.length>1 && !STOPWORDS.has(w));
+}
+function similarity(user, correct){
+  const ut = new Set(tokenize(user));
+  const ct = tokenize(correct);
+  if(!ct.length) return 0;
+  const matched = ct.filter(t=>ut.has(t)).length;
+  return matched / ct.length;
+}
+
+// count cards per last-judgment state
+function countByState(state){
+  let n = 0;
+  for(const c of ALL){
+    const last = stats[c.id]?.last || 'new';
+    if(last === state) n++;
+  }
+  return n;
+}
+
+// build the module + filter pills on the setup screen
+function buildTestSetup(){
+  // ── Module pills
+  const wrap = document.getElementById('test-mod-pills');
+  wrap.innerHTML = '';
+  testMods = new Set();
+  const all = document.createElement('button');
+  all.type = 'button';
+  all.className = 'mod-pill';
+  all.dataset.mod = 'all';
+  all.innerHTML = `All <span class="pill-count">${ALL.length}</span>`;
+  all.addEventListener('click', ()=>togglePill('all'));
+  wrap.appendChild(all);
+  const labels = {1:'M1 Fundamentals',2:'M2 Outside/Inside',3:'M3 Business & Corporate',4:'M4 Innovation & BM',5:'M5 Organizing & Change'};
+  [1,2,3,4,5].forEach(m=>{
+    const count = ALL.filter(c=>c.m==m).length;
+    const btn = document.createElement('button');
+    btn.type='button'; btn.className='mod-pill'; btn.dataset.mod=String(m);
+    btn.innerHTML = `${labels[m]} <span class="pill-count">${count}</span>`;
+    btn.addEventListener('click', ()=>togglePill(String(m)));
+    wrap.appendChild(btn);
+  });
+
+  // ── Judgment-filter pills
+  const fwrap = document.getElementById('test-filter-pills');
+  fwrap.innerHTML = '';
+  testFilters = new Set(['new','w','p','c']);
+  const filters = [
+    {key:'new', label:'🆕 New (untested)',  color:''},
+    {key:'w',   label:'✗ Wrong',            color:'var(--red)'},
+    {key:'p',   label:'◐ Partial',          color:'var(--amber)'},
+    {key:'c',   label:'✓ Correct',          color:'var(--green)'},
+  ];
+  filters.forEach(f=>{
+    const count = countByState(f.key);
+    const btn = document.createElement('button');
+    btn.type='button'; btn.className='mod-pill on'; btn.dataset.filter=f.key;
+    btn.innerHTML = `${f.label} <span class="pill-count">${count}</span>`;
+    btn.addEventListener('click', ()=>toggleFilter(f.key));
+    fwrap.appendChild(btn);
+  });
+
+  // ── Options reset
+  document.getElementById('test-smart').checked = false;
+  document.getElementById('test-shuffle').checked = true;
+}
+
+function toggleFilter(key){
+  const btn = document.querySelector(`[data-filter="${key}"]`);
+  btn.classList.toggle('on');
+  if(btn.classList.contains('on')) testFilters.add(key); else testFilters.delete(key);
+}
+
+// Smart priority — higher = needs more practice
+function smartPriority(card){
+  const s = stats[card.id];
+  if(!s || (s.c + s.p + s.w) === 0) return 1.5; // never seen → top
+  const total = s.c + s.p + s.w;
+  const success = (s.c + 0.5*s.p) / total;       // partial counts half
+  const weakness = 1 - success;                  // 0–1
+  const daysSince = (Date.now() - (s.t||0)) / (1000*60*60*24);
+  const freshness = Math.min(0.4, daysSince*0.04); // older cards bumped up
+  // last-judgment penalty: if last was wrong, push up
+  const lastBoost = s.last==='w' ? 0.25 : s.last==='p' ? 0.10 : 0;
+  return weakness + freshness + lastBoost;
+}
+
+function togglePill(key){
+  const pills = document.querySelectorAll('#test-mod-pills .mod-pill');
+  if(key==='all'){
+    const wasOn = document.querySelector('#test-mod-pills [data-mod="all"]').classList.contains('on');
+    pills.forEach(p=>{
+      if(wasOn){ p.classList.remove('on'); }
+      else     { p.classList.add('on'); }
+    });
+    testMods = wasOn ? new Set() : new Set(['1','2','3','4','5']);
+  } else {
+    const btn = document.querySelector(`#test-mod-pills [data-mod="${key}"]`);
+    btn.classList.toggle('on');
+    if(btn.classList.contains('on')) testMods.add(key); else testMods.delete(key);
+    // sync "All" pill
+    const allOn = ['1','2','3','4','5'].every(m=>testMods.has(m));
+    document.querySelector('#test-mod-pills [data-mod="all"]').classList.toggle('on', allOn);
+  }
+}
+
+function startTest(){
+  if(testMods.size===0){ alert('Please select at least one module.'); return; }
+  if(testFilters.size===0){ alert('Please select at least one card state to train.'); return; }
+
+  testSmart = document.getElementById('test-smart').checked;
+  const shuffleOn = document.getElementById('test-shuffle').checked;
+
+  // module filter
+  let pool = ALL.filter(c=>testMods.has(String(c.m)));
+  // judgment-state filter
+  pool = pool.filter(c=>{
+    const last = stats[c.id]?.last || 'new';
+    return testFilters.has(last);
+  });
+  if(pool.length===0){ alert('No cards match those filters. Try selecting more states or modules.'); return; }
+
+  // sequence the deck
+  if(testSmart){
+    pool.sort((a,b)=> smartPriority(b) - smartPriority(a));
+    // light shuffle within near-tied priority bands so it doesn't feel deterministic
+    const banded = [];
+    let band = [], lastP = null;
+    pool.forEach(c=>{
+      const p = smartPriority(c);
+      if(lastP===null || Math.abs(p-lastP)<0.05) band.push(c);
+      else { banded.push(...shuffle(band)); band=[c]; }
+      lastP = p;
+    });
+    banded.push(...shuffle(band));
+    testDeck = banded;
+  } else {
+    testDeck = shuffleOn ? shuffle([...pool]) : [...pool];
+  }
+
+  testIdx = 0;
+  testCorrect = 0; testPartial = 0; testWrong = 0; testSkipped = 0;
+  testLastJudgment = null;
+
+  document.getElementById('test-setup').classList.add('hide');
+  document.getElementById('test-result-screen').style.display='none';
+  document.getElementById('test-running').classList.remove('hide');
+  document.getElementById('t-smart-banner').style.display = testSmart ? '' : 'none';
+  testRender();
+}
+
+function testRender(){
+  const card = testDeck[testIdx];
+  if(!card){ showTestResult(); return; }
+
+  testSubmitted = false; testJudged = false; testCurrentVerdict = null; testLastJudgment = null;
+
+  document.getElementById('t-cat').textContent = `M${card.m} · ${card.cat}`;
+  const sb = document.getElementById('t-src');
+  if(card.src){ sb.textContent=card.src; sb.style.display=''; } else sb.style.display='none';
+
+  document.getElementById('t-term').textContent = card.term;
+  const inp = document.getElementById('t-input');
+  inp.value = ''; inp.disabled = false;
+
+  document.getElementById('t-submit-btn').disabled = false;
+  document.getElementById('t-submit-btn').style.display = '';
+  document.getElementById('t-result').classList.remove('show');
+  document.getElementById('t-next-btn').classList.remove('show');
+
+  // reset judge buttons
+  ['t-mark-wrong','t-mark-partial','t-mark-right'].forEach(id=>{
+    const b = document.getElementById(id);
+    b.classList.remove('suggested','active-pick');
+    b.style.opacity = 1;
+  });
+
+  updateTestStats();
+  document.getElementById('t-progress').textContent = `Card ${testIdx+1} of ${testDeck.length}`;
+
+  setTimeout(()=>inp.focus(), 60);
+}
+
+function updateTestStats(){
+  document.getElementById('t-correct').textContent = testCorrect;
+  document.getElementById('t-partial').textContent = testPartial;
+  document.getElementById('t-wrong').textContent   = testWrong;
+  document.getElementById('t-skip').textContent    = testSkipped;
+  const ans = testCorrect + testPartial + testWrong;
+  // weight: correct=1, partial=0.5, wrong=0
+  const score = ans ? Math.round(((testCorrect + 0.5*testPartial)/ans)*100) : null;
+  document.getElementById('t-pct').textContent = score!==null ? score+'%' : '—';
+}
+
+function testSubmit(){
+  if(testSubmitted) return;
+  const card = testDeck[testIdx];
+  const user = document.getElementById('t-input').value.trim();
+  if(!user){ alert('Type an answer first, or click Skip.'); return; }
+
+  testSubmitted = true;
+  document.getElementById('t-input').disabled = true;
+  document.getElementById('t-submit-btn').style.display = 'none';
+
+  const sim = similarity(user, card.def);
+  const pct = Math.round(sim*100);
+
+  // tiers → verdict + which button is suggested ('c'|'p'|'w')
+  let verdict, icon, text, suggest;
+  if(sim >= 0.55){
+    verdict='good'; icon='✅'; suggest='c';
+    text = `<strong>Looks correct (${pct}% match)</strong> — your answer covers the key ideas. Confirm or override below.`;
+  } else if(sim >= 0.25){
+    verdict='partial'; icon='🤔'; suggest='p';
+    text = `<strong>Partial match (${pct}%)</strong> — fundamentally right with grammar/phrasing differences, or missing some key ideas? <strong>You decide.</strong>`;
+  } else {
+    verdict='bad'; icon='❌'; suggest='w';
+    text = `<strong>Looks wrong (${pct}% match)</strong> — doesn't seem to cover the key ideas. Override if you actually got it right.`;
+  }
+  testCurrentVerdict = verdict;
+
+  const v = document.getElementById('t-verdict');
+  v.className = 'test-verdict '+verdict;
+  document.getElementById('t-verdict-icon').textContent = icon;
+  document.getElementById('t-verdict-text').innerHTML = text;
+  document.getElementById('t-verdict-fill').style.width = pct+'%';
+  document.getElementById('t-answer').textContent = card.def;
+
+  document.getElementById('t-mark-wrong').classList.toggle('suggested',   suggest==='w');
+  document.getElementById('t-mark-partial').classList.toggle('suggested', suggest==='p');
+  document.getElementById('t-mark-right').classList.toggle('suggested',   suggest==='c');
+
+  document.getElementById('t-result').classList.add('show');
+}
+
+function testJudge(verdict){ // 'c' | 'p' | 'w'
+  if(!testSubmitted) return;
+  const card = testDeck[testIdx];
+  const id = card.id;
+
+  // If user is re-judging, undo previous tally first
+  if(testJudged && testLastJudgment){
+    if(testLastJudgment==='c') testCorrect = Math.max(0, testCorrect-1);
+    if(testLastJudgment==='p') testPartial = Math.max(0, testPartial-1);
+    if(testLastJudgment==='w') testWrong   = Math.max(0, testWrong-1);
+    if(stats[id]){
+      stats[id][testLastJudgment] = Math.max(0, stats[id][testLastJudgment]-1);
+    }
+  }
+
+  // Apply new tally
+  testJudged = true;
+  testLastJudgment = verdict;
+  if(verdict==='c'){ testCorrect++; known.add(id); learning.delete(id); }
+  if(verdict==='p'){ testPartial++; learning.add(id); known.delete(id); }
+  if(verdict==='w'){ testWrong++;   learning.add(id); known.delete(id); }
+
+  // Update per-card stats (used by Smart mode + filters)
+  if(!stats[id]) stats[id] = {c:0,p:0,w:0,last:null,t:0};
+  stats[id][verdict]++;
+  stats[id].last = verdict;
+  stats[id].t = Date.now();
+  save();
+
+  updateTestStats();
+
+  // visually mark active judgment
+  ['t-mark-wrong','t-mark-partial','t-mark-right'].forEach(bid=>{
+    const b = document.getElementById(bid);
+    b.classList.remove('active-pick');
+    b.style.opacity = .45;
+  });
+  const map = {c:'t-mark-right', p:'t-mark-partial', w:'t-mark-wrong'};
+  const active = document.getElementById(map[verdict]);
+  active.classList.add('active-pick');
+  active.style.opacity = 1;
+
+  document.getElementById('t-next-btn').classList.add('show');
+  document.getElementById('t-next-btn').focus();
+}
+
+function testSkip(){
+  if(testSubmitted){ testNext(); return; }
+  testSkipped++;
+  updateTestStats();
+  testNext();
+}
+
+function testNext(){
+  if(testIdx < testDeck.length-1){ testIdx++; testRender(); }
+  else showTestResult();
+}
+
+function testEnd(){
+  if(!confirm('End the test now? Your progress will be shown.')) return;
+  showTestResult();
+}
+
+function showTestResult(){
+  document.getElementById('test-running').classList.add('hide');
+  const reviewed = testCorrect + testPartial + testWrong;
+  const weighted = testCorrect + 0.5*testPartial;
+  const pct = reviewed ? Math.round((weighted/reviewed)*100) : 0;
+  const icon = pct>=80?'🏆':pct>=60?'✅':pct>=40?'📚':'💪';
+  const r = document.getElementById('test-result-screen');
+  r.style.display='flex';
+  r.innerHTML = `
+    <div class="complete-icon">${icon}</div>
+    <h2>Test Complete</h2>
+    <p>Weighted score: <strong>${weighted}/${reviewed}</strong> · ${pct}% (Partial counts as ½)<br>${testSkipped} skipped</p>
+    <div class="c-grid">
+      <div class="c-box g"><div class="c-n">${testCorrect}</div><div class="c-l">Correct</div></div>
+      <div class="c-box" style="background:var(--amber-lt)"><div class="c-n" style="color:var(--amber)">${testPartial}</div><div class="c-l">Partial</div></div>
+      <div class="c-box r"><div class="c-n">${testWrong}</div><div class="c-l">Wrong</div></div>
+      <div class="c-box b"><div class="c-n">${testSkipped}</div><div class="c-l">Skipped</div></div>
+    </div>
+    <button class="btn-primary" onclick="testRetryWeak()">Retry Wrong + Partial</button>
+    <button class="btn-ghost" onclick="testRestart()">New Test</button>
+  `;
+}
+
+function testRetryWeak(){
+  // retry the wrong + partial cards from this session (using their last judgment)
+  const seen = testDeck.slice(0, testIdx + (testJudged?1:0));
+  const weak = seen.filter(c=>{
+    const last = stats[c.id]?.last;
+    return last==='w' || last==='p';
+  });
+  if(weak.length===0){ alert('No wrong or partial cards to retry — great job!'); return; }
+  testDeck = shuffle([...weak]);
+  testIdx = 0;
+  testCorrect = 0; testPartial = 0; testWrong = 0; testSkipped = 0;
+  testLastJudgment = null;
+  document.getElementById('test-result-screen').style.display='none';
+  document.getElementById('test-running').classList.remove('hide');
+  testRender();
+}
+
+function testRestart(){
+  document.getElementById('test-result-screen').style.display='none';
+  document.getElementById('test-running').classList.add('hide');
+  document.getElementById('test-setup').classList.remove('hide');
+  buildTestSetup();
+}
+
+// ═════════════════════════════════════════════════════════════
+// KEYBOARD
+// ═════════════════════════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  const tag = e.target.tagName;
+
+  // Test-mode textarea shortcuts (Cmd/Ctrl+Enter to submit; Enter alone allowed for newline)
+  if(mode==='test' && e.target.id==='t-input'){
+    if((e.metaKey||e.ctrlKey) && e.key==='Enter'){
+      e.preventDefault();
+      testSubmit();
+    }
+    return;
+  }
+
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT') return;
+  if(document.getElementById('overlay').classList.contains('show')){
+    if(e.key==='Escape') document.getElementById('overlay').classList.remove('show');
+    return;
+  }
+
+  // Test mode (input is not focused)
+  if(mode==='test'){
+    if(!document.getElementById('test-running').classList.contains('hide')){
+      if(e.key==='Enter' && testSubmitted && testJudged){ e.preventDefault(); testNext(); return; }
+      if(e.key==='1' && testSubmitted) { e.preventDefault(); testJudge('w'); return; }
+      if(e.key==='2' && testSubmitted) { e.preventDefault(); testJudge('p'); return; }
+      if(e.key==='3' && testSubmitted) { e.preventDefault(); testJudge('c'); return; }
+      if(e.key==='s' && !testSubmitted){ e.preventDefault(); testSkip(); return; }
+    }
+    return;
+  }
+
+  if(mode==='flash'){
+    switch(e.key){
+      case ' ': case 'Enter': e.preventDefault(); flipCard(); break;
+      case 'ArrowRight': e.preventDefault(); next(); break;
+      case 'ArrowLeft':  e.preventDefault(); prev(); break;
+      case '1': if(flipped) mark(false); break;
+      case '2': if(flipped) mark(true);  break;
+    }
+  } else if(mode==='quiz'){
+    switch(e.key){
+      case 'ArrowRight': e.preventDefault(); quizNext(); break;
+      case 'ArrowLeft':  e.preventDefault(); quizPrev(); break;
+      case '1': case '2': case '3': case '4':
+        const q = qDeck[qIdx];
+        if(q && qAnswers[q.id]===undefined && parseInt(e.key)<=q.opts.length) answerQuiz(parseInt(e.key)-1);
+        break;
+    }
+  } else if(mode==='exam' && !document.getElementById('exam-running').classList.contains('hide')){
+    switch(e.key){
+      case 'ArrowRight': e.preventDefault(); examNext(); break;
+      case 'ArrowLeft':  e.preventDefault(); examPrev(); break;
+      case '1': case '2': case '3': case '4':
+        const q = exDeck[exIdx];
+        if(q && parseInt(e.key)<=q.opts.length){ exAnswers[q.id] = parseInt(e.key)-1; examRender(); }
+        break;
+    }
+  }
+});
+
+// ═════════════════════════════════════════════════════════════
+// INIT
+// ═════════════════════════════════════════════════════════════
+load();
+buildFlashBanner();
+buildDeck();
+render();
+</script>
+</body>
+</html>
