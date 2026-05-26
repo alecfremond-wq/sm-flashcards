@@ -1008,7 +1008,6 @@ function getPool(){
 
 function buildDeck(){
   let pool = getPool();
-  if(!searchActive && !filterWeak){ pool = pool.filter(c=>!known.has(c.id)); if(pool.length===0) pool = getPool(); }
   deck = shuffled ? shuffle([...pool]) : [...pool];
 }
 
