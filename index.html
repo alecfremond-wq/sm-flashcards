@@ -61,6 +61,19 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:18px 1
 .known-dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-lt);display:none}
 .known-dot.show{display:inline-block}
 
+/* MASTERY SIDEBAR */
+.mastery-sidebar{position:fixed;left:18px;top:140px;width:225px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);z-index:100}
+.mastery-sidebar h3{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.ms-row{margin-bottom:11px}
+.ms-row:last-child{margin-bottom:0}
+.ms-label{display:flex;justify-content:space-between;align-items:baseline;font-size:.74rem;font-weight:600;color:var(--text);margin-bottom:4px}
+.ms-label .ms-count{font-size:.7rem;font-weight:700;color:var(--green)}
+.ms-track{height:6px;background:var(--bg);border-radius:99px;overflow:hidden}
+.ms-fill{height:100%;background:var(--green);border-radius:99px;transition:width .3s}
+.ms-total{margin-top:12px;padding-top:12px;border-top:1.5px solid var(--border)}
+.ms-total .ms-label{font-size:.78rem}
+@media (max-width:1330px){.mastery-sidebar{display:none}}
+
 /* CARD */
 .scene{width:100%;height:var(--card-h);perspective:1200px;cursor:pointer;margin-bottom:16px}
 .card-3d{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .42s cubic-bezier(.4,0,.2,1)}
@@ -323,6 +336,11 @@ footer kbd{background:var(--surface);border:1px solid var(--border);border-radiu
   <div class="prog-meta"><span id="prog-txt">Card 1</span><span id="prog-pct">0%</span></div>
   <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
 </div>
+
+<aside class="mastery-sidebar" id="mastery-sidebar">
+  <h3>🏆 Mastery <span style="font-weight:400;text-transform:none;letter-spacing:0">(test ✓)</span></h3>
+  <div id="mastery-rows"></div>
+</aside>
 
 <main>
 
@@ -1018,6 +1036,7 @@ function save(){
     localStorage.setItem('sm-stats', JSON.stringify(stats));
     localStorage.setItem('sm-custom', JSON.stringify(ALL.filter(c=>c.id>=70)));
   }catch(e){}
+  updateMastery();
 }
 function load(){
   try{
@@ -1914,12 +1933,39 @@ document.addEventListener('keydown',e=>{
 });
 
 // ═════════════════════════════════════════════════════════════
+// MASTERY SIDEBAR
+// ═════════════════════════════════════════════════════════════
+const MOD_NAMES = {1:'M1 · Fundamentals',2:'M2 · Outside-in / Inside-out',3:'M3 · Business & Corporate',4:'M4 · Innovation & BM',5:'M5 · Organizing & Change'};
+function updateMastery(){
+  const box = document.getElementById('mastery-rows');
+  if(!box) return;
+  let html = '', gTot = 0, gMast = 0;
+  [1,2,3,4,5].forEach(m=>{
+    const cards = ALL.filter(c=>c.m==m);
+    const mastered = cards.filter(c=>stats[c.id]?.last==='c').length;
+    const pct = cards.length ? Math.round((mastered/cards.length)*100) : 0;
+    gTot += cards.length; gMast += mastered;
+    html += `<div class="ms-row">
+      <div class="ms-label"><span>${MOD_NAMES[m]}</span><span class="ms-count">${mastered}/${cards.length}</span></div>
+      <div class="ms-track"><div class="ms-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  });
+  const gPct = gTot ? Math.round((gMast/gTot)*100) : 0;
+  html += `<div class="ms-row ms-total">
+    <div class="ms-label"><span>Total</span><span class="ms-count">${gMast}/${gTot} · ${gPct}%</span></div>
+    <div class="ms-track"><div class="ms-fill" style="width:${gPct}%"></div></div>
+  </div>`;
+  box.innerHTML = html;
+}
+
+// ═════════════════════════════════════════════════════════════
 // INIT
 // ═════════════════════════════════════════════════════════════
 load();
 buildFlashBanner();
 buildDeck();
 render();
+updateMastery();
 </script>
 </body>
 </html>
