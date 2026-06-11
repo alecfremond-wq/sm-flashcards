@@ -84,7 +84,7 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:18px 1
 .timer-time{font-variant-numeric:tabular-nums;min-width:44px;text-align:center}
 .timer-btn{background:none;border:none;cursor:pointer;font-size:.8rem;line-height:1;padding:2px;color:inherit;font-family:inherit}
 .timer-btn:hover{opacity:.7}
-@media (max-width:1330px){.timer-chip{display:flex}}
+@media (max-width:1150px){.timer-chip{display:flex}}
 
 /* TIMER SIDEBAR */
 .timer-sidebar{position:fixed;right:18px;top:140px;width:225px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);z-index:100}
@@ -101,7 +101,12 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:18px 1
 .ts-reopen{position:fixed;right:18px;top:140px;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);box-shadow:var(--shadow);cursor:pointer;font-size:1.05rem;display:none;align-items:center;justify-content:center;z-index:100}
 .ts-reopen:hover{border-color:var(--indigo)}
 .ts-reopen.show{display:flex}
-@media (max-width:1330px){.timer-sidebar,.ts-reopen{display:none!important}}
+@media (max-width:1330px){
+  .timer-sidebar{width:150px;padding:12px;right:10px}
+  .ts-display{font-size:1.4rem;margin-bottom:10px}
+  .ts-btn{padding:8px 0;font-size:.75rem}
+}
+@media (max-width:1150px){.timer-sidebar,.ts-reopen{display:none!important}}
 
 /* MASTERY SIDEBAR */
 .mastery-sidebar{position:fixed;left:18px;top:140px;width:225px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);z-index:100}
@@ -1189,15 +1194,17 @@ function render(){
   document.getElementById('nav-count').textContent = pos;
   document.getElementById('prog-txt').textContent  = `Card ${idx+1} of ${deck.length}`;
 
-  const total = modFilter(ALL, activeMod).length;
-  const reviewed = known.size + learning.size;
-  const pct = total ? Math.round((reviewed/total)*100) : 0;
+  const modPool = modFilter(ALL, activeMod);
+  const total = modPool.length;
+  const modKnown = modPool.filter(c=>known.has(c.id)).length;
+  const modLearn = modPool.filter(c=>learning.has(c.id)).length;
+  const pct = total ? Math.round(((modKnown+modLearn)/total)*100) : 0;
   document.getElementById('prog-fill').style.width = pct+'%';
   document.getElementById('prog-pct').textContent = pct+'%';
 
-  document.getElementById('s-know').textContent  = known.size;
-  document.getElementById('s-learn').textContent = learning.size;
-  document.getElementById('s-left').textContent  = Math.max(0, total - known.size - learning.size);
+  document.getElementById('s-know').textContent  = modKnown;
+  document.getElementById('s-learn').textContent = modLearn;
+  document.getElementById('s-left').textContent  = total - modKnown - modLearn;
 
   document.getElementById('btn-prev').disabled = idx===0;
   document.getElementById('btn-next').disabled = idx===deck.length-1;
