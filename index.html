@@ -78,6 +78,13 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:18px 1
 .user-chip .uc-avatar{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:#fff;background:var(--indigo)}
 .user-chip .uc-switch{font-size:.62rem;font-weight:600;color:var(--muted)}
 
+/* STUDY TIMER */
+.timer-chip{display:flex;align-items:center;gap:6px;padding:5px 10px;border:1.5px solid var(--border);border-radius:99px;background:var(--surface);font-size:.78rem;font-weight:700;color:var(--text)}
+.timer-chip.running{border-color:var(--green);color:var(--green)}
+.timer-time{font-variant-numeric:tabular-nums;min-width:44px;text-align:center}
+.timer-btn{background:none;border:none;cursor:pointer;font-size:.8rem;line-height:1;padding:2px;color:inherit;font-family:inherit}
+.timer-btn:hover{opacity:.7}
+
 /* MASTERY SIDEBAR */
 .mastery-sidebar{position:fixed;left:18px;top:140px;width:225px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);z-index:100}
 .mastery-sidebar h3{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);margin-bottom:12px;display:flex;align-items:center;gap:6px}
@@ -349,6 +356,11 @@ footer kbd{background:var(--surface);border:1px solid var(--border);border-radiu
   <button class="user-chip" id="user-chip" onclick="location.reload()" title="Changer d'utilisateur" style="display:none">
     <span class="uc-avatar" id="uc-avatar">—</span><span id="uc-name">—</span><span class="uc-switch">⇄</span>
   </button>
+  <div class="timer-chip" id="timer-chip">
+    <button class="timer-btn" id="timer-toggle" onclick="toggleTimer()" title="Démarrer / Pause">▶</button>
+    <span class="timer-time" id="timer-time">00:00</span>
+    <button class="timer-btn" onclick="resetTimer()" title="Remettre à zéro">↺</button>
+  </div>
   <div class="hdr-stats">
     <div class="hst k"><div class="hst-n" id="s-know">0</div><div class="hst-l">Know</div></div>
     <div class="hst r"><div class="hst-n" id="s-learn">0</div><div class="hst-l">Learning</div></div>
@@ -1997,6 +2009,32 @@ const USERS = [{name:'GT', color:'var(--indigo)'},{name:'TIM', color:'var(--gree
 function userStats(u){
   if(u===currentUser) return stats;
   try{ return JSON.parse(localStorage.getItem(`sm-${u}-stats`)||'{}'); }catch(e){ return {}; }
+}
+
+// ─── STUDY TIMER ───
+let studySec = 0, studyInterval = null;
+function fmtTimer(s){
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  const mm = String(m).padStart(2,'0'), ss = String(sec).padStart(2,'0');
+  return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+function toggleTimer(){
+  if(studyInterval){
+    clearInterval(studyInterval); studyInterval = null;
+    document.getElementById('timer-toggle').textContent = '▶';
+    document.getElementById('timer-chip').classList.remove('running');
+  } else {
+    studyInterval = setInterval(()=>{
+      studySec++;
+      document.getElementById('timer-time').textContent = fmtTimer(studySec);
+    }, 1000);
+    document.getElementById('timer-toggle').textContent = '⏸';
+    document.getElementById('timer-chip').classList.add('running');
+  }
+}
+function resetTimer(){
+  studySec = 0;
+  document.getElementById('timer-time').textContent = '00:00';
 }
 
 function toggleSidebar(){
