@@ -79,11 +79,29 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:18px 1
 .user-chip .uc-switch{font-size:.62rem;font-weight:600;color:var(--muted)}
 
 /* STUDY TIMER */
-.timer-chip{display:flex;align-items:center;gap:6px;padding:5px 10px;border:1.5px solid var(--border);border-radius:99px;background:var(--surface);font-size:.78rem;font-weight:700;color:var(--text)}
+.timer-chip{display:none;align-items:center;gap:6px;padding:5px 10px;border:1.5px solid var(--border);border-radius:99px;background:var(--surface);font-size:.78rem;font-weight:700;color:var(--text)}
 .timer-chip.running{border-color:var(--green);color:var(--green)}
 .timer-time{font-variant-numeric:tabular-nums;min-width:44px;text-align:center}
 .timer-btn{background:none;border:none;cursor:pointer;font-size:.8rem;line-height:1;padding:2px;color:inherit;font-family:inherit}
 .timer-btn:hover{opacity:.7}
+@media (max-width:1330px){.timer-chip{display:flex}}
+
+/* TIMER SIDEBAR */
+.timer-sidebar{position:fixed;right:18px;top:140px;width:225px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);z-index:100}
+.timer-sidebar h3{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.timer-sidebar.hidden{display:none}
+.ts-display{font-size:2rem;font-weight:800;font-variant-numeric:tabular-nums;text-align:center;color:var(--text);margin-bottom:14px}
+.timer-sidebar.running .ts-display{color:var(--green)}
+.ts-btns{display:flex;gap:8px}
+.ts-btn{flex:1;padding:10px 0;border-radius:9px;font-size:.85rem;font-weight:700;border:1.5px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-family:inherit;transition:all .15s}
+.ts-btn:hover{border-color:var(--indigo);color:var(--indigo)}
+.ts-btn.ts-main{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.ts-btn.ts-main:hover{filter:brightness(1.1);color:#fff}
+.timer-sidebar.running .ts-btn.ts-main{background:var(--green);border-color:var(--green)}
+.ts-reopen{position:fixed;right:18px;top:140px;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);box-shadow:var(--shadow);cursor:pointer;font-size:1.05rem;display:none;align-items:center;justify-content:center;z-index:100}
+.ts-reopen:hover{border-color:var(--indigo)}
+.ts-reopen.show{display:flex}
+@media (max-width:1330px){.timer-sidebar,.ts-reopen{display:none!important}}
 
 /* MASTERY SIDEBAR */
 .mastery-sidebar{position:fixed;left:18px;top:140px;width:225px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);z-index:100}
@@ -394,6 +412,16 @@ footer kbd{background:var(--surface);border:1px solid var(--border);border-radiu
   <div id="mastery-rows"></div>
 </aside>
 <button class="ms-reopen" id="ms-reopen" onclick="toggleSidebar()" title="Afficher la progression">🏆</button>
+
+<aside class="timer-sidebar" id="timer-sidebar">
+  <h3>⏱ Timer<button class="ms-close" onclick="toggleTimerSidebar()" title="Masquer">✕</button></h3>
+  <div class="ts-display" id="ts-display">00:00</div>
+  <div class="ts-btns">
+    <button class="ts-btn ts-main" id="ts-toggle" onclick="toggleTimer()">▶ Start</button>
+    <button class="ts-btn" onclick="resetTimer()">↺ Reset</button>
+  </div>
+</aside>
+<button class="ts-reopen" id="ts-reopen" onclick="toggleTimerSidebar()" title="Afficher le timer">⏱</button>
 
 <main>
 
@@ -2018,24 +2046,30 @@ function fmtTimer(s){
   const mm = String(m).padStart(2,'0'), ss = String(sec).padStart(2,'0');
   return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
 }
+function timerPaint(){
+  const t = fmtTimer(studySec), on = !!studyInterval;
+  document.getElementById('timer-time').textContent = t;
+  document.getElementById('ts-display').textContent = t;
+  document.getElementById('timer-toggle').textContent = on ? '⏸' : '▶';
+  document.getElementById('ts-toggle').textContent = on ? '⏸ Pause' : '▶ Start';
+  document.getElementById('timer-chip').classList.toggle('running', on);
+  document.getElementById('timer-sidebar').classList.toggle('running', on);
+}
 function toggleTimer(){
-  if(studyInterval){
-    clearInterval(studyInterval); studyInterval = null;
-    document.getElementById('timer-toggle').textContent = '▶';
-    document.getElementById('timer-chip').classList.remove('running');
-  } else {
-    studyInterval = setInterval(()=>{
-      studySec++;
-      document.getElementById('timer-time').textContent = fmtTimer(studySec);
-    }, 1000);
-    document.getElementById('timer-toggle').textContent = '⏸';
-    document.getElementById('timer-chip').classList.add('running');
-  }
+  if(studyInterval){ clearInterval(studyInterval); studyInterval = null; }
+  else studyInterval = setInterval(()=>{ studySec++; timerPaint(); }, 1000);
+  timerPaint();
 }
 function resetTimer(){
   studySec = 0;
-  document.getElementById('timer-time').textContent = '00:00';
+  timerPaint();
 }
+function toggleTimerSidebar(){
+  const hidden = document.getElementById('timer-sidebar').classList.toggle('hidden');
+  document.getElementById('ts-reopen').classList.toggle('show', hidden);
+  try{ localStorage.setItem('sm-timer-hidden', hidden ? '1' : ''); }catch(e){}
+}
+if(localStorage.getItem('sm-timer-hidden')==='1') toggleTimerSidebar();
 
 function toggleSidebar(){
   const hidden = document.getElementById('mastery-sidebar').classList.toggle('hidden');
