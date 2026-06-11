@@ -1004,6 +1004,7 @@ let ALL = [
 ];
 
 ALL.forEach((c,i)=>c.id=i);
+const BUILTIN_COUNT = ALL.length;
 let nextId = ALL.length;
 
 // ═════════════════════════════════════════════════════════════
@@ -1133,7 +1134,7 @@ function save(){
     localStorage.setItem(skey('known'), JSON.stringify([...known]));
     localStorage.setItem(skey('learning'), JSON.stringify([...learning]));
     localStorage.setItem(skey('stats'), JSON.stringify(stats));
-    localStorage.setItem(skey('custom'), JSON.stringify(ALL.filter(c=>c.id>=70)));
+    localStorage.setItem(skey('custom'), JSON.stringify(ALL.filter(c=>c.custom)));
   }catch(e){}
   updateMastery();
 }
@@ -1143,8 +1144,12 @@ function load(){
     const l = JSON.parse(localStorage.getItem(skey('learning'))||'[]');
     known = new Set(k); learning = new Set(l);
     stats = JSON.parse(localStorage.getItem(skey('stats'))||'{}');
-    const custom = JSON.parse(localStorage.getItem(skey('custom'))||'[]');
-    ALL = ALL.filter(c=>c.id<70).concat(custom);
+    let custom = JSON.parse(localStorage.getItem(skey('custom'))||'[]');
+    // older builds wrongly stored built-in cards here — keep only true user cards
+    custom = custom.filter(c=>c.custom || c.id>=BUILTIN_COUNT);
+    custom.forEach(c=>c.custom=true);
+    ALL = ALL.filter(c=>!c.custom).concat(custom);
+    nextId = custom.reduce((mx,c)=>Math.max(mx,c.id+1), BUILTIN_COUNT);
   }catch(e){ stats = {}; }
 }
 
@@ -1379,7 +1384,7 @@ function saveCard(){
     const c = ALL.find(c=>c.id===editingId);
     if(c){ c.term=term; c.def=def; c.m=mod; c.src=src; c.cat=cat; }
   } else {
-    ALL.push({id:nextId++,m:mod,cat,src,term,def});
+    ALL.push({id:nextId++,m:mod,cat,src,term,def,custom:true});
   }
   save();
   closeModal();
