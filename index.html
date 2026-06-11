@@ -61,6 +61,23 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:18px 1
 .known-dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-lt);display:none}
 .known-dot.show{display:inline-block}
 
+/* USER PICKER */
+.user-overlay{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:28px}
+.user-overlay h1{font-size:1.4rem;font-weight:700;color:var(--text)}
+.user-overlay h1 span{color:var(--indigo)}
+.user-overlay p{color:var(--sub);font-size:.9rem;margin-top:-18px}
+.user-btns{display:flex;gap:18px}
+.user-btn{width:160px;padding:28px 0;border:2px solid var(--border);border-radius:var(--radius);background:var(--surface);cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:var(--shadow);transition:all .15s}
+.user-btn:hover{border-color:var(--indigo);transform:translateY(-2px)}
+.user-btn .u-avatar{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#fff}
+.user-btn .u-name{font-size:1rem;font-weight:700;color:var(--text)}
+.user-btn.u-gt .u-avatar{background:var(--indigo)}
+.user-btn.u-tim .u-avatar{background:var(--green)}
+.user-chip{display:flex;align-items:center;gap:7px;padding:5px 12px 5px 6px;border:1.5px solid var(--border);border-radius:99px;background:var(--surface);cursor:pointer;font-family:inherit;font-size:.78rem;font-weight:700;color:var(--text);transition:border-color .15s}
+.user-chip:hover{border-color:var(--indigo)}
+.user-chip .uc-avatar{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:#fff;background:var(--indigo)}
+.user-chip .uc-switch{font-size:.62rem;font-weight:600;color:var(--muted)}
+
 /* MASTERY SIDEBAR */
 .mastery-sidebar{position:fixed;left:18px;top:140px;width:225px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);z-index:100}
 .mastery-sidebar h3{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);margin-bottom:12px;display:flex;align-items:center;gap:6px}
@@ -307,8 +324,20 @@ footer kbd{background:var(--surface);border:1px solid var(--border);border-radiu
 </head>
 <body>
 
+<div class="user-overlay" id="user-overlay">
+  <h1>SM <span>Study App</span></h1>
+  <p>Qui révise aujourd'hui ?</p>
+  <div class="user-btns">
+    <button class="user-btn u-gt" onclick="selectUser('GT')"><span class="u-avatar">GT</span><span class="u-name">GT</span></button>
+    <button class="user-btn u-tim" onclick="selectUser('TIM')"><span class="u-avatar">T</span><span class="u-name">TIM</span></button>
+  </div>
+</div>
+
 <header>
   <div class="logo">SM <span>Study App</span></div>
+  <button class="user-chip" id="user-chip" onclick="location.reload()" title="Changer d'utilisateur" style="display:none">
+    <span class="uc-avatar" id="uc-avatar">—</span><span id="uc-name">—</span><span class="uc-switch">⇄</span>
+  </button>
   <div class="hdr-stats">
     <div class="hst k"><div class="hst-n" id="s-know">0</div><div class="hst-l">Know</div></div>
     <div class="hst r"><div class="hst-n" id="s-learn">0</div><div class="hst-l">Learning</div></div>
@@ -1029,21 +1058,36 @@ let stats = {};
 // ═════════════════════════════════════════════════════════════
 // LOCAL STORAGE
 // ═════════════════════════════════════════════════════════════
+let currentUser = null;
+function skey(name){ return `sm-${currentUser}-${name}`; }
+
+// GT used the app before the user system existed — adopt the legacy data once
+function migrateLegacy(){
+  if(currentUser!=='GT' || localStorage.getItem(skey('stats'))!==null) return;
+  ['known','learning','stats','custom'].forEach(n=>{
+    const old = localStorage.getItem('sm-'+n);
+    if(old!==null) localStorage.setItem(skey(n), old);
+  });
+}
+
 function save(){
+  if(!currentUser) return;
   try{
-    localStorage.setItem('sm-known', JSON.stringify([...known]));
-    localStorage.setItem('sm-learning', JSON.stringify([...learning]));
-    localStorage.setItem('sm-stats', JSON.stringify(stats));
-    localStorage.setItem('sm-custom', JSON.stringify(ALL.filter(c=>c.id>=70)));
+    localStorage.setItem(skey('known'), JSON.stringify([...known]));
+    localStorage.setItem(skey('learning'), JSON.stringify([...learning]));
+    localStorage.setItem(skey('stats'), JSON.stringify(stats));
+    localStorage.setItem(skey('custom'), JSON.stringify(ALL.filter(c=>c.id>=70)));
   }catch(e){}
   updateMastery();
 }
 function load(){
   try{
-    const k = JSON.parse(localStorage.getItem('sm-known')||'[]');
-    const l = JSON.parse(localStorage.getItem('sm-learning')||'[]');
+    const k = JSON.parse(localStorage.getItem(skey('known'))||'[]');
+    const l = JSON.parse(localStorage.getItem(skey('learning'))||'[]');
     known = new Set(k); learning = new Set(l);
-    stats = JSON.parse(localStorage.getItem('sm-stats')||'{}');
+    stats = JSON.parse(localStorage.getItem(skey('stats'))||'{}');
+    const custom = JSON.parse(localStorage.getItem(skey('custom'))||'[]');
+    ALL = ALL.filter(c=>c.id<70).concat(custom);
   }catch(e){ stats = {}; }
 }
 
@@ -1961,11 +2005,21 @@ function updateMastery(){
 // ═════════════════════════════════════════════════════════════
 // INIT
 // ═════════════════════════════════════════════════════════════
-load();
-buildFlashBanner();
-buildDeck();
-render();
-updateMastery();
+function selectUser(u){
+  currentUser = u;
+  migrateLegacy();
+  document.getElementById('user-overlay').style.display = 'none';
+  const chip = document.getElementById('user-chip');
+  chip.style.display = '';
+  document.getElementById('uc-avatar').textContent = u==='TIM' ? 'T' : u;
+  document.getElementById('uc-avatar').style.background = u==='TIM' ? 'var(--green)' : 'var(--indigo)';
+  document.getElementById('uc-name').textContent = u;
+  load();
+  buildFlashBanner();
+  buildDeck();
+  render();
+  updateMastery();
+}
 </script>
 </body>
 </html>
