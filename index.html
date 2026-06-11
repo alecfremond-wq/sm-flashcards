@@ -58,6 +58,8 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:18px 1
 .cat-badge,.src-badge{display:inline-flex;align-items:center;gap:5px;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:4px 10px;border-radius:99px}
 .cat-badge{background:var(--indigo-lt);color:var(--indigo)}
 .src-badge{background:var(--amber-lt);color:var(--amber)}
+.known-dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-lt);display:none}
+.known-dot.show{display:inline-block}
 
 /* CARD */
 .scene{width:100%;height:var(--card-h);perspective:1200px;cursor:pointer;margin-bottom:16px}
@@ -334,6 +336,7 @@ footer kbd{background:var(--surface);border:1px solid var(--border);border-radiu
     <div class="cat-row">
       <span class="cat-badge" id="cat-badge">—</span>
       <span class="src-badge" id="src-badge" style="display:none">—</span>
+      <span class="known-dot" id="known-dot" title="Answered correctly in last test"></span>
     </div>
 
     <div class="search-bar" id="search-bar"><input id="search-inp" type="text" placeholder="Search terms or definitions…"></div>
@@ -388,6 +391,7 @@ footer kbd{background:var(--surface);border:1px solid var(--border);border-radiu
 
     <div class="toolbar">
       <button class="tb-btn" id="btn-shuf" onclick="toggleShuffle()">⇄ Shuffle</button>
+      <button class="tb-btn" id="btn-smart" onclick="toggleSmartFlash()" title="Order cards weakest-first based on your test history">🧠 Smart</button>
       <button class="tb-btn" id="btn-filt" onclick="toggleFilter()">📚 Learning only</button>
       <button class="tb-btn" id="btn-search" onclick="toggleSearch()">🔍 Search</button>
       <button class="tb-btn" onclick="resetAll()">↺ Restart</button>
@@ -976,7 +980,7 @@ QUIZ.forEach((q,i)=>q.id='q'+i);
 // ═════════════════════════════════════════════════════════════
 let mode = 'flash';
 let activeMod = 'all';
-let deck = [], idx = 0, flipped = false, shuffled = false, filterWeak = false;
+let deck = [], idx = 0, flipped = false, shuffled = false, filterWeak = false, smartFlash = false;
 let known = new Set(), learning = new Set();
 let editingId = null;
 let searchActive = false, searchTerm = '';
@@ -1045,7 +1049,8 @@ function getPool(){
 
 function buildDeck(){
   let pool = getPool();
-  deck = shuffled ? shuffle([...pool]) : [...pool];
+  if(smartFlash) deck = [...pool].sort((a,b)=> smartPriority(b) - smartPriority(a));
+  else deck = shuffled ? shuffle([...pool]) : [...pool];
 }
 
 // ═════════════════════════════════════════════════════════════
@@ -1061,6 +1066,7 @@ function render(){
   document.getElementById('cat-badge').textContent = `M${card.m} · ${card.cat}`;
   const srcBadge = document.getElementById('src-badge');
   if(card.src){ srcBadge.textContent = card.src; srcBadge.style.display=''; } else srcBadge.style.display='none';
+  document.getElementById('known-dot').classList.toggle('show', stats[card.id]?.last==='c');
   document.getElementById('term-txt').textContent = card.term;
   document.getElementById('def-txt').textContent  = card.def;
 
@@ -1202,6 +1208,7 @@ function syncFlashBanner(){
 // TOOLBAR
 // ═════════════════════════════════════════════════════════════
 function toggleShuffle(){ shuffled=!shuffled; document.getElementById('btn-shuf').classList.toggle('on',shuffled); buildDeck(); idx=0; render(); }
+function toggleSmartFlash(){ smartFlash=!smartFlash; document.getElementById('btn-smart').classList.toggle('on',smartFlash); buildDeck(); idx=0; render(); }
 function toggleFilter(){ filterWeak=!filterWeak; document.getElementById('btn-filt').classList.toggle('on',filterWeak); buildDeck(); idx=0; render(); }
 function toggleSearch(){
   searchActive=!searchActive;
