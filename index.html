@@ -87,8 +87,12 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:18px 1
 .ms-label .ms-count{font-size:.7rem;font-weight:700;color:var(--green)}
 .ms-track{height:6px;background:var(--bg);border-radius:99px;overflow:hidden}
 .ms-fill{height:100%;background:var(--green);border-radius:99px;transition:width .3s}
-.ms-total{margin-top:12px;padding-top:12px;border-top:1.5px solid var(--border)}
-.ms-total .ms-label{font-size:.78rem}
+.ms-user{padding:10px;border:1.5px solid var(--border);border-radius:10px;margin-bottom:10px}
+.ms-user:last-child{margin-bottom:0}
+.ms-user.ms-me{border-color:currentColor;background:var(--bg)}
+.ms-user-head{display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:800;margin-bottom:9px}
+.ms-user-head .ms-user-total{margin-left:auto;font-size:.7rem;font-weight:700}
+.ms-you{font-size:.58rem;font-weight:700;text-transform:uppercase;color:#fff;border-radius:99px;padding:2px 7px}
 @media (max-width:1330px){.mastery-sidebar{display:none}}
 
 /* CARD */
@@ -1980,25 +1984,37 @@ document.addEventListener('keydown',e=>{
 // MASTERY SIDEBAR
 // ═════════════════════════════════════════════════════════════
 const MOD_NAMES = {1:'M1 · Fundamentals',2:'M2 · Outside-in / Inside-out',3:'M3 · Business & Corporate',4:'M4 · Innovation & BM',5:'M5 · Organizing & Change'};
+const USERS = [{name:'GT', color:'var(--indigo)'},{name:'TIM', color:'var(--green)'}];
+
+function userStats(u){
+  if(u===currentUser) return stats;
+  try{ return JSON.parse(localStorage.getItem(`sm-${u}-stats`)||'{}'); }catch(e){ return {}; }
+}
+
 function updateMastery(){
   const box = document.getElementById('mastery-rows');
   if(!box) return;
-  let html = '', gTot = 0, gMast = 0;
-  [1,2,3,4,5].forEach(m=>{
-    const cards = ALL.filter(c=>c.m==m);
-    const mastered = cards.filter(c=>stats[c.id]?.last==='c').length;
-    const pct = cards.length ? Math.round((mastered/cards.length)*100) : 0;
-    gTot += cards.length; gMast += mastered;
-    html += `<div class="ms-row">
-      <div class="ms-label"><span>${MOD_NAMES[m]}</span><span class="ms-count">${mastered}/${cards.length}</span></div>
-      <div class="ms-track"><div class="ms-fill" style="width:${pct}%"></div></div>
+  let html = '';
+  USERS.forEach(({name, color})=>{
+    const s = userStats(name);
+    const me = name===currentUser;
+    let gTot = 0, gMast = 0, rows = '';
+    [1,2,3,4,5].forEach(m=>{
+      const cards = ALL.filter(c=>c.m==m);
+      const mastered = cards.filter(c=>s[c.id]?.last==='c').length;
+      const pct = cards.length ? Math.round((mastered/cards.length)*100) : 0;
+      gTot += cards.length; gMast += mastered;
+      rows += `<div class="ms-row">
+        <div class="ms-label"><span>${MOD_NAMES[m]}</span><span class="ms-count" style="color:${color}">${mastered}/${cards.length}</span></div>
+        <div class="ms-track"><div class="ms-fill" style="width:${pct}%;background:${color}"></div></div>
+      </div>`;
+    });
+    const gPct = gTot ? Math.round((gMast/gTot)*100) : 0;
+    html += `<div class="ms-user${me?' ms-me':''}">
+      <div class="ms-user-head" style="color:${color}">${name}${me?` <span class="ms-you" style="background:${color}">toi</span>`:''}<span class="ms-user-total">${gMast}/${gTot} · ${gPct}%</span></div>
+      ${rows}
     </div>`;
   });
-  const gPct = gTot ? Math.round((gMast/gTot)*100) : 0;
-  html += `<div class="ms-row ms-total">
-    <div class="ms-label"><span>Total</span><span class="ms-count">${gMast}/${gTot} · ${gPct}%</span></div>
-    <div class="ms-track"><div class="ms-fill" style="width:${gPct}%"></div></div>
-  </div>`;
   box.innerHTML = html;
 }
 
