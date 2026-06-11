@@ -81,6 +81,13 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:18px 1
 /* MASTERY SIDEBAR */
 .mastery-sidebar{position:fixed;left:18px;top:140px;width:225px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);z-index:100}
 .mastery-sidebar h3{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.ms-close{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem;line-height:1;padding:2px 4px;border-radius:5px}
+.ms-close:hover{color:var(--text);background:var(--bg)}
+.mastery-sidebar.hidden{display:none}
+.ms-reopen{position:fixed;left:18px;top:140px;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);box-shadow:var(--shadow);cursor:pointer;font-size:1.05rem;display:none;align-items:center;justify-content:center;z-index:100}
+.ms-reopen:hover{border-color:var(--indigo)}
+.ms-reopen.show{display:flex}
+@media (max-width:1330px){.ms-reopen{display:none!important}}
 .ms-row{margin-bottom:11px}
 .ms-row:last-child{margin-bottom:0}
 .ms-label{display:flex;justify-content:space-between;align-items:baseline;font-size:.74rem;font-weight:600;color:var(--text);margin-bottom:4px}
@@ -371,9 +378,10 @@ footer kbd{background:var(--surface);border:1px solid var(--border);border-radiu
 </div>
 
 <aside class="mastery-sidebar" id="mastery-sidebar">
-  <h3>🏆 Mastery <span style="font-weight:400;text-transform:none;letter-spacing:0">(test ✓)</span></h3>
+  <h3>🏆 Mastery <span style="font-weight:400;text-transform:none;letter-spacing:0">(test ✓)</span><button class="ms-close" onclick="toggleSidebar()" title="Masquer">✕</button></h3>
   <div id="mastery-rows"></div>
 </aside>
+<button class="ms-reopen" id="ms-reopen" onclick="toggleSidebar()" title="Afficher la progression">🏆</button>
 
 <main>
 
@@ -1990,6 +1998,13 @@ function userStats(u){
   if(u===currentUser) return stats;
   try{ return JSON.parse(localStorage.getItem(`sm-${u}-stats`)||'{}'); }catch(e){ return {}; }
 }
+
+function toggleSidebar(){
+  const hidden = document.getElementById('mastery-sidebar').classList.toggle('hidden');
+  document.getElementById('ms-reopen').classList.toggle('show', hidden);
+  try{ localStorage.setItem('sm-sidebar-hidden', hidden ? '1' : ''); }catch(e){}
+}
+if(localStorage.getItem('sm-sidebar-hidden')==='1') toggleSidebar();
 
 function updateMastery(){
   const box = document.getElementById('mastery-rows');
