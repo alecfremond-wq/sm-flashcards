@@ -497,6 +497,7 @@ footer kbd{background:var(--surface);border:1px solid var(--border);border-radiu
       <button class="tb-btn" id="btn-shuf" onclick="toggleShuffle()">⇄ Shuffle</button>
       <button class="tb-btn" id="btn-smart" onclick="toggleSmartFlash()" title="Order cards weakest-first based on your test history">🧠 Smart</button>
       <button class="tb-btn" id="btn-filt" onclick="toggleFilter()">📚 Learning only</button>
+      <button class="tb-btn" id="btn-exam" onclick="togglePastExams()" title="Show only flashcards whose concept appeared in a past exam (2022–2025)">🎯 Past exams only</button>
       <button class="tb-btn" id="btn-search" onclick="toggleSearch()">🔍 Search</button>
       <button class="tb-btn" onclick="resetAll()">↺ Restart</button>
       <button class="tb-btn add" onclick="openAdd()">＋ Add card</button>
@@ -980,6 +981,142 @@ let ALL = [
 ];
 
 ALL.forEach((c,i)=>c.id=i);
+// ── Cards whose concept appeared in a past central/resit exam (2022–2025) ──
+// Keyed by term (stable across reordering). 131 of 253 cards.
+const TESTED_TERMS = new Set([
+  "Outside-in Perspective",
+  "Inside-out Perspective",
+  "5 Levels of Strategy",
+  "Strategy (Porter's Definition)",
+  "Dynamic Heterogeneity",
+  "4 Elements of Performance",
+  "ESG Risk Reporting — 3 Buckets",
+  "Net-Zero by 2050 (Topping 2019)",
+  "Greenium",
+  "Race to Net Zero",
+  "Mission Statement",
+  "Vision Statement",
+  "Difference: Mission vs. Vision vs. Values vs. Objectives",
+  "PESTEL Framework",
+  "SWOT Analysis — Principle",
+  "Porter's Five Forces",
+  "Two Factors of Firm Profitability (Porter)",
+  "Bargaining Power of Buyers",
+  "Bargaining Power of Suppliers",
+  "Threat of Substitutes",
+  "Threat of New Entrants",
+  "Rivalry Among Existing Competitors",
+  "Challenges of 5 Forces Model",
+  "Industry Life Cycle — 5 Phases",
+  "Resource-Based View (Key Quote)",
+  "VRIO Framework (Collis & Montgomery)",
+  "V — Value (VRIO)",
+  "R — Rarity (VRIO)",
+  "I — Imitability (VRIO)",
+  "O — Organization (VRIO)",
+  "Tangible vs. Intangible Resources",
+  "Dynamic Capabilities — Definition",
+  "3 Components of Dynamic Capabilities (Teece)",
+  "Microfoundations — SEIZING",
+  "Microfoundations — RECONFIGURING",
+  "3 Generic Types of Dynamic Capabilities",
+  "Value Chain",
+  "Activity System",
+  "Value System",
+  "Ecosystem (Jacobides Definition)",
+  "Modularity & Complementarity",
+  "Jacobides — 5 Ecosystem Questions",
+  "Jacobides — NOT a Recommendation",
+  "Ecosystem — 3 Defining Properties",
+  "PESTEL — Political",
+  "PESTEL — Economic",
+  "PESTEL — Social",
+  "PESTEL — Technological",
+  "PESTEL — Ecological",
+  "PESTEL — Legal",
+  "Strategic Business Unit (SBU)",
+  "Cost Leadership Strategy",
+  "4 Sources of Cost Leadership (Porter)",
+  "Differentiation Strategy",
+  "Focus Strategy",
+  "Hybrid Strategy",
+  "Types of Hybrid Strategy",
+  "SBU Criteria",
+  "Generic Strategy Examples",
+  "Pipeline vs. Platform — 3 Shifts (Van Alstyne 2016)",
+  "Platform Strategy — 4 Steps",
+  "Chicken-or-Egg Problem",
+  "New Platform Metrics (Van Alstyne 2016)",
+  "Digital Competition — Key Shift",
+  "Platform — Choose Market Sides",
+  "Platform — Solve Chicken-or-Egg",
+  "Platform — Design Business Model",
+  "Platform — Enforce Ecosystem Rules",
+  "Corporate Strategy",
+  "3 Generic Types of Corporate Strategy",
+  "Corporate Discount — Sources",
+  "BCG Matrix",
+  "4 Diversification Strategies (Ansoff)",
+  "Corporate Surplus vs. Corporate Discount",
+  "Portfolio Manager",
+  "Synergy Manager",
+  "Parental Developer",
+  "Stakeholder Theory",
+  "Shareholder Theory (Friedman)",
+  "Embedded View",
+  "Open Innovation",
+  "4 Types of Open Innovation Processes",
+  "4 Startup Engagement Models",
+  "Open-Source Developer Motivations (Dahlander & Wallin 2015)",
+  "Open Innovation — Closed vs. Open",
+  "Innovator's Dilemma (Christensen)",
+  "Sustaining vs. Disruptive Innovation",
+  "Christensen & Overdorf (2000) Integration Matrix",
+  "Diffusion S-Curve",
+  "Innovator's Dilemma — Core Quote",
+  "Disruption — Often-Overlooked Principles",
+  "Examples of Disruptive Innovation",
+  "Strategic Advice on Disruption",
+  "4 Options to Integrate Disruptive Innovation",
+  "Product vs. Process Innovation",
+  "Technology Push vs. Market Pull",
+  "Pisano Capability Matrix",
+  "S-Curve — Key Decision Points",
+  "Business Model (Casadesus-Masanell)",
+  "Magic Triangle (Business Model)",
+  "Business Model Innovation",
+  "Strategies for New Business Models",
+  "Magic Triangle — 4 Dimensions",
+  "Structure Follows Strategy (Chandler)",
+  "Functional Structure",
+  "Multidivisional Structure",
+  "Matrix Structure",
+  "Project-Based Structure",
+  "Why Structure Matters",
+  "Functional Structure — Pros & Cons",
+  "Multidivisional Structure — Pros & Cons",
+  "Matrix — Pros & Cons",
+  "Project-Based — Pros & Cons",
+  "3 Leadership Styles (Continuum)",
+  "Transactional Leadership",
+  "Transformational Leadership",
+  "Intellectual Stimulation (Transformational)",
+  "Leadership Styles — Continuum",
+  "5 Approaches to Strategy Development",
+  "Strategic Planning — Pros & Cons",
+  "Intended vs. Emergent vs. Realized Strategy",
+  "How Strategies Emerge",
+  "Open Strategy (Stadler 2021)",
+  "Open Strategy — Central Dilemmas",
+  "Open Strategy Tools (Stadler 2021)",
+  "Strategic Planning — Disadvantages",
+  "4 Pillars of Digital Transformation (Furr 2022)",
+  "IT Uplift — Required Capabilities (Furr 2022)",
+  "Digital Transformation Challenge",
+  "Types of Strategic Change",
+  "Furr 2022 — 4 Pillars Detail",
+]);
+ALL.forEach(c=>{ c.tested = TESTED_TERMS.has(c.term); });
 const BUILTIN_COUNT = ALL.length;
 let nextId = ALL.length;
 
@@ -1061,7 +1198,7 @@ QUIZ.forEach((q,i)=>q.id='q'+i);
 // ═════════════════════════════════════════════════════════════
 let mode = 'flash';
 let activeMod = 'all';
-let deck = [], idx = 0, flipped = false, shuffled = false, filterWeak = false, smartFlash = false;
+let deck = [], idx = 0, flipped = false, shuffled = false, filterWeak = false, smartFlash = false, pastExamsOnly = false;
 let known = new Set(), learning = new Set();
 let editingId = null;
 let edits = {}; // overrides for built-in cards, persisted across refreshes
@@ -1171,6 +1308,7 @@ function getPool(){
     base = base.filter(c=> c.term.toLowerCase().includes(t) || c.def.toLowerCase().includes(t));
   }
   if(filterWeak) base = base.filter(c=>learning.has(c.id));
+  if(pastExamsOnly) base = base.filter(c=>c.tested);
   return base;
 }
 
@@ -1339,6 +1477,7 @@ function syncFlashBanner(){
 function toggleShuffle(){ shuffled=!shuffled; document.getElementById('btn-shuf').classList.toggle('on',shuffled); buildDeck(); idx=0; render(); }
 function toggleSmartFlash(){ smartFlash=!smartFlash; document.getElementById('btn-smart').classList.toggle('on',smartFlash); buildDeck(); idx=0; render(); }
 function toggleFilter(){ filterWeak=!filterWeak; document.getElementById('btn-filt').classList.toggle('on',filterWeak); buildDeck(); idx=0; render(); }
+function togglePastExams(){ pastExamsOnly=!pastExamsOnly; document.getElementById('btn-exam').classList.toggle('on',pastExamsOnly); buildDeck(); idx=0; render(); }
 function toggleSearch(){
   searchActive=!searchActive;
   document.getElementById('btn-search').classList.toggle('on',searchActive);
