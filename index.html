@@ -1064,6 +1064,7 @@ let activeMod = 'all';
 let deck = [], idx = 0, flipped = false, shuffled = false, filterWeak = false, smartFlash = false;
 let known = new Set(), learning = new Set();
 let editingId = null;
+let edits = {}; // overrides for built-in cards, persisted across refreshes
 let searchActive = false, searchTerm = '';
 
 // Quiz state
@@ -1111,6 +1112,7 @@ function save(){
     localStorage.setItem(skey('learning'), JSON.stringify([...learning]));
     localStorage.setItem(skey('stats'), JSON.stringify(stats));
     localStorage.setItem(skey('custom'), JSON.stringify(ALL.filter(c=>c.custom)));
+    localStorage.setItem(skey('edits'), JSON.stringify(edits));
   }catch(e){}
   updateMastery();
 }
@@ -1142,6 +1144,8 @@ function load(){
     const l = JSON.parse(localStorage.getItem(skey('learning'))||'[]');
     known = new Set(k); learning = new Set(l);
     stats = JSON.parse(localStorage.getItem(skey('stats'))||'{}');
+    edits = JSON.parse(localStorage.getItem(skey('edits'))||'{}');
+    ALL.forEach(c=>{ if(!c.custom && edits[c.id]) Object.assign(c, edits[c.id]); });
     let custom = JSON.parse(localStorage.getItem(skey('custom'))||'[]');
     // older builds wrongly stored built-in cards here — keep only true user cards
     custom = custom.filter(c=>c.custom || c.id>=BUILTIN_COUNT);
@@ -1380,7 +1384,10 @@ function saveCard(){
   if(!term||!def){alert('Please fill in both Term and Definition.');return;}
   if(editingId!=null){
     const c = ALL.find(c=>c.id===editingId);
-    if(c){ c.term=term; c.def=def; c.m=mod; c.src=src; c.cat=cat; }
+    if(c){
+      c.term=term; c.def=def; c.m=mod; c.src=src; c.cat=cat;
+      if(!c.custom) edits[c.id]={term,def,m:mod,src,cat};
+    }
   } else {
     ALL.push({id:nextId++,m:mod,cat,src,term,def,custom:true});
   }
