@@ -569,6 +569,9 @@ footer kbd{background:var(--surface);border:1px solid var(--border);border-radiu
     <div class="setup-opts">
       <label><input type="checkbox" id="test-shuffle" checked> Shuffle order (ignored when Smart mode is on)</label>
     </div>
+    <div class="setup-opts">
+      <label><input type="checkbox" id="test-open"> ✍️ <strong>Open questions only</strong> — case-study application cards (143 of 253)</label>
+    </div>
 
     <button class="btn-primary" onclick="startTest()">Start Test</button>
   </div>
@@ -1994,6 +1997,7 @@ function buildTestSetup(){
   // ── Options reset
   document.getElementById('test-smart').checked = false;
   document.getElementById('test-shuffle').checked = true;
+  document.getElementById('test-open').checked = false;
 }
 
 function toggleFilter(key){
@@ -2042,14 +2046,18 @@ function startTest(){
   testSmart = document.getElementById('test-smart').checked;
   const shuffleOn = document.getElementById('test-shuffle').checked;
 
+  const openOnlyTest = document.getElementById('test-open').checked;
+
   // module filter
   let pool = ALL.filter(c=>testMods.has(String(c.m)));
+  // open-question filter
+  if(openOnlyTest) pool = pool.filter(c=>c.openTested);
   // judgment-state filter
   pool = pool.filter(c=>{
     const last = stats[c.id]?.last || 'new';
     return testFilters.has(last);
   });
-  if(pool.length===0){ alert('No cards match those filters. Try selecting more states or modules.'); return; }
+  if(pool.length===0){ alert('No cards match those filters. Try selecting more states or modules'+(openOnlyTest?', or turn off "Open questions only"':'')+'.'); return; }
 
   // sequence the deck
   if(testSmart){
