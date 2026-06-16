@@ -498,6 +498,7 @@ footer kbd{background:var(--surface);border:1px solid var(--border);border-radiu
       <button class="tb-btn" id="btn-smart" onclick="toggleSmartFlash()" title="Order cards weakest-first based on your test history">🧠 Smart</button>
       <button class="tb-btn" id="btn-filt" onclick="toggleFilter()">📚 Learning only</button>
       <button class="tb-btn" id="btn-exam" onclick="togglePastExams()" title="Show only flashcards whose concept appeared in a past exam (2022–2025)">🎯 Past exams only</button>
+      <button class="tb-btn" id="btn-open" onclick="toggleOpenOnly()" title="Show only flashcards relevant to open / case-study questions — application frameworks (143 of 253)">✍️ Open questions</button>
       <button class="tb-btn" id="btn-search" onclick="toggleSearch()">🔍 Search</button>
       <button class="tb-btn" onclick="resetAll()">↺ Restart</button>
       <button class="tb-btn add" onclick="openAdd()">＋ Add card</button>
@@ -1117,6 +1118,155 @@ const TESTED_TERMS = new Set([
   "Furr 2022 — 4 Pillars Detail",
 ]);
 ALL.forEach(c=>{ c.tested = TESTED_TERMS.has(c.term); });
+// ── Cards relevant to OPEN questions (case-study application) ──
+// Appeared in a past open question OR is an application framework of
+// open-question style. Excludes MCQ-only recall. 143 of 253 cards.
+const OPEN_TERMS = new Set([
+  "Outside-in Perspective",
+  "Inside-out Perspective",
+  "5 Levels of Strategy",
+  "Strategy (Porter's Definition)",
+  "3 Bases for Strategic Positioning",
+  "Race to Net Zero",
+  "PESTEL Framework",
+  "SWOT Analysis — Principle",
+  "Porter's Five Forces",
+  "Bargaining Power of Buyers",
+  "Bargaining Power of Suppliers",
+  "Threat of Substitutes",
+  "Threat of New Entrants",
+  "Rivalry Among Existing Competitors",
+  "Challenges of 5 Forces Model",
+  "Resource-Based View (Key Quote)",
+  "VRIO Framework (Collis & Montgomery)",
+  "V — Value (VRIO)",
+  "R — Rarity (VRIO)",
+  "I — Imitability (VRIO)",
+  "O — Organization (VRIO)",
+  "Tangible vs. Intangible Resources",
+  "VRIO — From Capability to Core Competence",
+  "Dynamic Capabilities — Definition",
+  "3 Components of Dynamic Capabilities (Teece)",
+  "Microfoundations — SENSING",
+  "Microfoundations — SEIZING",
+  "Microfoundations — RECONFIGURING",
+  "3 Generic Types of Dynamic Capabilities",
+  "Value Chain",
+  "Primary vs. Support Activities",
+  "Ecosystem (Jacobides Definition)",
+  "Modularity & Complementarity",
+  "Jacobides — 5 Ecosystem Questions",
+  "Ecosystem — Key Implications",
+  "Ecosystem — 3 Defining Properties",
+  "PESTEL — Political",
+  "PESTEL — Economic",
+  "PESTEL — Social",
+  "PESTEL — Technological",
+  "PESTEL — Ecological",
+  "PESTEL — Legal",
+  "Cost Leadership Strategy",
+  "4 Sources of Cost Leadership (Porter)",
+  "Differentiation Strategy",
+  "Focus Strategy",
+  "Stuck in the Middle (U-Curve)",
+  "Hybrid Strategy",
+  "Types of Hybrid Strategy",
+  "Creating Competitive Advantage — 3 Conditions",
+  "Differentiation — Sources",
+  "Generic Strategy Examples",
+  "How to Follow a Hybrid Strategy",
+  "Pipeline vs. Platform — 3 Shifts (Van Alstyne 2016)",
+  "Platform Strategy — 4 Steps",
+  "Chicken-or-Egg Problem",
+  "Digital Competition — Key Shift",
+  "Platform — Choose Market Sides",
+  "Platform — Solve Chicken-or-Egg",
+  "Platform — Design Business Model",
+  "Platform — Enforce Ecosystem Rules",
+  "Corporate Strategy",
+  "3 Generic Types of Corporate Strategy",
+  "Types of Synergies",
+  "4 Diversification Strategies (Ansoff)",
+  "Corporate Surplus vs. Corporate Discount",
+  "Portfolio Manager",
+  "Synergy Manager",
+  "Parental Developer",
+  "Operational Synergies",
+  "Management Synergies",
+  "Market Power Synergies",
+  "Leveraging Synergies → New Markets",
+  "Stakeholder Theory",
+  "Shareholder Theory (Friedman)",
+  "Embedded View",
+  "CSR-Related Concepts",
+  "Corporate Advantage (Collis & Montgomery 1998)",
+  "Corporate Strategy Triangle (Collis & Montgomery)",
+  "Parenting Advantage",
+  "Why Closed Innovation Fails in VUCA",
+  "Open Innovation",
+  "4 Types of Open Innovation Processes",
+  "5 External Sources of Innovation",
+  "Open Innovation — Closed vs. Open",
+  "Innovator's Dilemma (Christensen)",
+  "Sustaining vs. Disruptive Innovation",
+  "Christensen & Overdorf (2000) Integration Matrix",
+  "Innovator's Dilemma — Core Quote",
+  "Disruption — Often-Overlooked Principles",
+  "Examples of Disruptive Innovation",
+  "Strategic Advice on Disruption",
+  "4 Options to Integrate Disruptive Innovation",
+  "Pisano Capability Matrix",
+  "Business Model (Casadesus-Masanell)",
+  "Magic Triangle (Business Model)",
+  "Business Model Innovation",
+  "Strategies for New Business Models",
+  "Magic Triangle — 4 Dimensions",
+  "Why BM Innovation Is Hard",
+  "Structure Follows Strategy (Chandler)",
+  "Functional Structure",
+  "Multidivisional Structure",
+  "Matrix Structure",
+  "Project-Based Structure",
+  "Multinational Structure",
+  "Why Structure Matters",
+  "Functional Structure — Pros & Cons",
+  "Multidivisional Structure — Pros & Cons",
+  "Matrix — Pros & Cons",
+  "Project-Based — Pros & Cons",
+  "Leadership — Definition",
+  "3 Leadership Styles (Continuum)",
+  "Transactional Leadership",
+  "Transformational Leadership",
+  "Charisma (Transformational)",
+  "Inspiration (Transformational)",
+  "Intellectual Stimulation (Transformational)",
+  "Individual Consideration (Transformational)",
+  "Leadership Styles — Continuum",
+  "Intrinsic vs. Extrinsic Motivation",
+  "5 Approaches to Strategy Development",
+  "Strategic Planning — Pros & Cons",
+  "Intended vs. Emergent vs. Realized Strategy",
+  "How Strategies Emerge",
+  "Open Strategy (Stadler 2021)",
+  "Open Strategy — Central Dilemmas",
+  "Open Strategy Tools (Stadler 2021)",
+  "Direction of Strategy Formation",
+  "Successful Strategic Initiatives — 3 Requirements",
+  "Strategic Planning — Basic Model",
+  "Strategic Planning — Disadvantages",
+  "Open Strategy — Two Dimensions",
+  "Change Kaleidoscope — 8 Factors",
+  "4 Pillars of Digital Transformation (Furr 2022)",
+  "Digital Transformation Challenge",
+  "Change Kaleidoscope — 8 Contextual Factors",
+  "Timing of Change — Phases",
+  "Types of Strategic Change",
+  "Why Transformations Fail",
+  "Diffusion of Change Process",
+  "Furr 2022 — 4 Pillars Detail",
+  "Digital Strategy — Formulation vs. Implementation",
+]);
+ALL.forEach(c=>{ c.openTested = OPEN_TERMS.has(c.term); });
 const BUILTIN_COUNT = ALL.length;
 let nextId = ALL.length;
 
@@ -1198,7 +1348,7 @@ QUIZ.forEach((q,i)=>q.id='q'+i);
 // ═════════════════════════════════════════════════════════════
 let mode = 'flash';
 let activeMod = 'all';
-let deck = [], idx = 0, flipped = false, shuffled = false, filterWeak = false, smartFlash = false, pastExamsOnly = false;
+let deck = [], idx = 0, flipped = false, shuffled = false, filterWeak = false, smartFlash = false, pastExamsOnly = false, openOnly = false;
 let known = new Set(), learning = new Set();
 let editingId = null;
 let edits = {}; // overrides for built-in cards, persisted across refreshes
@@ -1309,6 +1459,7 @@ function getPool(){
   }
   if(filterWeak) base = base.filter(c=>learning.has(c.id));
   if(pastExamsOnly) base = base.filter(c=>c.tested);
+  if(openOnly) base = base.filter(c=>c.openTested);
   return base;
 }
 
@@ -1478,6 +1629,7 @@ function toggleShuffle(){ shuffled=!shuffled; document.getElementById('btn-shuf'
 function toggleSmartFlash(){ smartFlash=!smartFlash; document.getElementById('btn-smart').classList.toggle('on',smartFlash); buildDeck(); idx=0; render(); }
 function toggleFilter(){ filterWeak=!filterWeak; document.getElementById('btn-filt').classList.toggle('on',filterWeak); buildDeck(); idx=0; render(); }
 function togglePastExams(){ pastExamsOnly=!pastExamsOnly; document.getElementById('btn-exam').classList.toggle('on',pastExamsOnly); buildDeck(); idx=0; render(); }
+function toggleOpenOnly(){ openOnly=!openOnly; document.getElementById('btn-open').classList.toggle('on',openOnly); buildDeck(); idx=0; render(); }
 function toggleSearch(){
   searchActive=!searchActive;
   document.getElementById('btn-search').classList.toggle('on',searchActive);
