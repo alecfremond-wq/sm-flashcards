@@ -150,7 +150,7 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:18px 1
 .card-btn.del-btn{background:var(--red-lt);color:var(--red)}
 .card-btn:hover{filter:brightness(.93)}
 .term{font-size:1.45rem;font-weight:700;color:var(--text);line-height:1.25}
-.def{font-size:.98rem;line-height:1.65;color:#fff;font-weight:400}
+.def{font-size:.98rem;line-height:1.65;color:#fff;font-weight:400;white-space:pre-line}
 
 /* FLASHCARD ACTIONS */
 .action-row{display:flex;gap:10px;width:100%;margin-bottom:14px;opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .22s,transform .22s}
@@ -304,7 +304,7 @@ footer kbd{background:var(--surface);border:1px solid var(--border);border-radiu
 
 .test-answer-block{padding:16px;background:var(--indigo-lt);border-left:3px solid var(--indigo);border-radius:6px;margin-bottom:14px}
 .test-answer-block .tab-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--indigo);margin-bottom:6px}
-.test-answer-block .tab-text{font-size:.92rem;line-height:1.6;color:var(--text)}
+.test-answer-block .tab-text{font-size:.92rem;line-height:1.6;color:var(--text);white-space:pre-line}
 
 .test-judge-row{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
 .test-judge-row .hint{flex:1 0 100%;font-size:.78rem;color:var(--muted);text-align:center;margin-bottom:4px}
@@ -344,7 +344,7 @@ footer kbd{background:var(--surface);border:1px solid var(--border);border-radiu
 .practice-reveal{margin-top:14px;padding-top:14px;border-top:1.5px solid var(--border);display:none}
 .practice-reveal.show{display:block}
 .practice-answer-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--indigo);margin-bottom:6px}
-.practice-answer-text{font-size:.92rem;line-height:1.65;color:var(--text);background:var(--indigo-lt);border-left:3px solid var(--indigo);border-radius:6px;padding:12px 14px}
+.practice-answer-text{font-size:.92rem;line-height:1.65;color:var(--text);background:var(--indigo-lt);border-left:3px solid var(--indigo);border-radius:6px;padding:12px 14px;white-space:pre-line}
 
 /* HIDDEN UTILITY */
 .hide{display:none!important}
@@ -951,7 +951,7 @@ let ALL = [
 {m:5,cat:"Strategy Development",src:"Lecture",term:"Intended vs. Emergent vs. Realized Strategy",def:"INTENDED: result of top management's considered intentions. EMERGENT: develop over time, not from a grand plan. REALIZED: what actually happens — often diverges from intended. Intended and emergent are NOT mutually exclusive."},
 {m:5,cat:"Strategy Development",src:"Lecture",term:"How Strategies Emerge",def:"Strategies can emerge through: EXPERIMENTATION (trial and error), BARGAINING (negotiation between actors), and ORGANIZATIONAL SYSTEMS (routines, processes shaping outcomes)."},
 {m:5,cat:"Strategy Development",src:"HBR",term:"Open Strategy (Stadler 2021)",def:"Involving internal and external stakeholders in strategy formation. Two dimensions: TRANSPARENCY (making strategy visible) and INCLUSION (extent stakeholders are consulted)."},
-{m:5,cat:"Strategy Development",src:"HBR",term:"Open Strategy — Central Dilemmas",def:"Every opening = a gain ⚔️ a cost. Pattern: OPEN UP (left) ⚔️ KEEP CONTROL (right). 1. PROCESS — more ideas ⚔️ less speed & control. 2. DISCLOSURE — transparency ⚔️ loss of secrecy. 3. EMPOWERMENT — give people a voice ⚔️ dilute management authority. 4. (ESCALATING) COMMITMENT — build consensus ⚔️ unable to change course. 5. GOVERNANCE — informal trust (flexible) ⚔️ formal contracts (control). Order: P-D-E-C-G."},
+{m:5,cat:"Strategy Development",src:"HBR",term:"Open Strategy — Central Dilemmas",def:"Every opening = a gain ⚔️ a cost. Pattern: OPEN UP (left) ⚔️ KEEP CONTROL (right).\n1. PROCESS — more ideas ⚔️ less speed & control.\n2. DISCLOSURE — transparency ⚔️ loss of secrecy.\n3. EMPOWERMENT — give people a voice ⚔️ dilute management authority.\n4. (ESCALATING) COMMITMENT — build consensus ⚔️ unable to change course.\n5. GOVERNANCE — informal trust (flexible) ⚔️ formal contracts (control).\nOrder: P-D-E-C-G."},
 {m:5,cat:"Strategy Development",src:"HBR",term:"Open Strategy Tools (Stadler 2021)",def:"For GENERATING strategic ideas: Trend Radar + Competitions. For STRATEGY EXECUTION: Jams (large-scale collaborative online events). Different tools for different stages of the open strategy process."},
 {m:5,cat:"Strategy Development",src:"Lecture",term:"Direction of Strategy Formation",def:"Strategies form TOP-DOWN (from senior leadership, command/planning approaches) or BOTTOM-UP (emergent from operational-level initiatives) — or both. Bottom-up often surfaces strategic opportunities that top-down planning misses."},
 {m:5,cat:"Strategy Development",src:"Lecture",term:"Successful Strategic Initiatives — 3 Requirements",def:"Burgelman: (1) Availability of autonomous entrepreneurial activity at the OPERATIONAL level. (2) Ability of MIDDLE managers to conceptualize strategic implications. (3) Capacity of TOP management to allow viable initiatives to change corporate strategy."},
